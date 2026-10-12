@@ -20,7 +20,7 @@ interface AuthLayoutProps {
 export function AuthLayout({ title, description, children, footer }: AuthLayoutProps) {
   return (
     <div className="grid min-h-dvh lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]">
-      <div className="flex flex-col px-4 py-6 sm:px-8">
+      <div className="flex flex-col px-4 pt-[calc(1.5rem+env(safe-area-inset-top))] pb-6 sm:px-8">
         <header>
           <Logo />
         </header>

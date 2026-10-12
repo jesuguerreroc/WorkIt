@@ -33,7 +33,7 @@ export function PublicHeader() {
   return (
     <header
       className={cn(
-        'sticky top-0 z-40 border-b transition-colors duration-200',
+        'sticky top-0 z-40 border-b pt-[env(safe-area-inset-top)] transition-colors duration-200',
         scrolled || open ? 'border-border bg-canvas/90 backdrop-blur-md' : 'border-transparent',
       )}
     >

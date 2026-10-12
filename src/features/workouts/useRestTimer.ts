@@ -60,9 +60,14 @@ export function useRestTimer(uid: string | undefined, workoutId: string) {
     beep()
     persist(null)
     setJustFinished(true)
-    const id = setTimeout(() => setJustFinished(false), 4000)
-    return () => clearTimeout(id)
   }, [rest, remainingMs, persist])
+
+  // Own effect so clearing the rest above does not cancel this timeout.
+  useEffect(() => {
+    if (!justFinished) return
+    const id = setTimeout(() => setJustFinished(false), 3000)
+    return () => clearTimeout(id)
+  }, [justFinished])
 
   const start = useCallback(
     (plan: RestPlan) => {
@@ -101,5 +106,7 @@ export function useRestTimer(uid: string | undefined, workoutId: string) {
     if (rest && rest.endsAt === null) persist({ ...rest, endsAt: Date.now() + (rest.pausedRemaining ?? 0), pausedRemaining: null })
   }, [rest, persist])
 
-  return { rest, remainingMs, justFinished, start, adjust, skip, freeze, unfreeze, step: REST_STEP_SECONDS }
+  const dismiss = useCallback(() => setJustFinished(false), [])
+
+  return { rest, remainingMs, justFinished, dismiss, start, adjust, skip, freeze, unfreeze, step: REST_STEP_SECONDS }
 }

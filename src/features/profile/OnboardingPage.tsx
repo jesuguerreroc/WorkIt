@@ -30,7 +30,7 @@ export function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-dvh">
+    <div className="min-h-dvh pt-[env(safe-area-inset-top)]">
       <header className="mx-auto flex h-16 max-w-3xl items-center justify-between px-4 sm:px-6">
         <Logo to="/app" />
         <Button variant="ghost" onClick={skip} loading={skipping}>

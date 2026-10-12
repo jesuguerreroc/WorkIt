@@ -7,15 +7,19 @@ const round =
 
 /** Floating rest pill: countdown, ±15 s and skip. */
 export function RestTimerBar({ timer, paused }: { timer: ReturnType<typeof useRestTimer>; paused: boolean }) {
-  const { rest, remainingMs, justFinished, adjust, skip, step } = timer
+  const { rest, remainingMs, justFinished, dismiss, adjust, skip, step } = timer
 
   if (!rest && justFinished) {
     return (
       <div role="status" className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-        <div className="mx-auto flex max-w-3xl items-center gap-3 rounded-full bg-primary px-6 py-4 font-semibold text-on-primary shadow-2xl motion-safe:animate-rise">
+        <button
+          type="button"
+          onClick={dismiss}
+          className="mx-auto flex w-full max-w-3xl items-center gap-3 rounded-full bg-primary px-6 py-4 text-left font-semibold text-on-primary shadow-2xl motion-safe:animate-rise"
+        >
           <BellRing className="size-6" aria-hidden="true" />
           Descanso terminado. ¡A por la siguiente serie!
-        </div>
+        </button>
       </div>
     )
   }

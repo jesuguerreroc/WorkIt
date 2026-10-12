@@ -13,7 +13,7 @@ interface StatusScreenProps {
 
 export function StatusScreen({ code, title, text }: StatusScreenProps) {
   return (
-    <div className="flex min-h-dvh flex-col px-4 py-6 sm:px-8">
+    <div className="flex min-h-dvh flex-col px-4 pt-[calc(1.5rem+env(safe-area-inset-top))] pb-6 sm:px-8">
       <Logo />
       <main className="flex flex-1 flex-col items-center justify-center text-center">
         <p className="font-display text-8xl font-bold text-primary">{code}</p>

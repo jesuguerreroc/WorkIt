@@ -88,18 +88,20 @@ export function AppShell() {
       </aside>
 
       <div className="flex min-h-dvh flex-col">
-        <header className="flex h-14 items-center border-b border-border px-4 lg:hidden">
-          <Logo to="/app" />
+        <header className="sticky top-0 z-30 flex items-center border-b border-border bg-canvas/95 px-4 pt-[env(safe-area-inset-top)] backdrop-blur-md lg:hidden">
+          <div className="flex h-14 items-center">
+            <Logo to="/app" />
+          </div>
         </header>
         {/* Bottom padding keeps content clear of the fixed tab bar and the home indicator. */}
-        <main className="flex-1 px-4 pt-6 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-10 lg:pt-10 lg:pb-10">
+        <main className="flex-1 px-4 pt-6 pb-[calc(4.5rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-10 lg:pt-10 lg:pb-10">
           <Outlet />
         </main>
       </div>
 
       <nav
         aria-label="Principal"
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-canvas/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-canvas/95 pb-[max(0.25rem,calc(env(safe-area-inset-bottom)-0.75rem))] backdrop-blur-md lg:hidden"
       >
         <ul className="grid grid-cols-5">
           {navItems.map((item) => (
@@ -109,7 +111,7 @@ export function AppShell() {
                 end={item.end}
                 className={({ isActive }) =>
                   cn(
-                    'flex min-h-16 flex-col items-center justify-center gap-1 text-[0.6875rem] font-semibold transition-colors',
+                    'flex min-h-14 flex-col items-center justify-center gap-1 text-[0.6875rem] font-semibold transition-colors',
                     isActive ? 'text-primary' : 'text-muted hover:text-fg',
                   )
                 }

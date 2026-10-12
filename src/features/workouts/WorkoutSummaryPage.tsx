@@ -26,7 +26,7 @@ export function WorkoutSummaryPage() {
   const streak = computeStreaks(countedWorkouts(all).map((w) => w.localDate), today)
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-3xl flex-col gap-6 px-4 py-8">
+    <div className="mx-auto flex min-h-dvh max-w-3xl flex-col gap-6 px-4 pt-[calc(2rem+env(safe-area-inset-top))] pb-8">
       <header className="motion-safe:animate-rise">
         <PartyPopper className="size-10 text-primary" aria-hidden="true" />
         <h1 className="mt-3 font-display text-5xl leading-none font-bold uppercase">
