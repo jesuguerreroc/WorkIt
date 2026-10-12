@@ -1,0 +1,173 @@
+rules_version = '2';
+
+// WorkIt — Cloud Firestore Security Rules
+//
+// Principles:
+// - Deny by default: anything not matched below is rejected.
+// - Each user can only read/write documents under users/{their uid}.
+// - Every write is validated (fields, types, enums, sizes). The client is never trusted.
+// - Collections for later phases stay closed until their own validated rules are added.
+//
+// Tests: tests/rules/firestore.rules.test.ts (npm run test:rules, needs Java 21 + Firebase CLI).
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // ---------- users/{uid}: profile ----------
+    // Mirrors src/types/profile.ts. Change both together.
+
+    function profileFields() {
+      return ['displayName', 'goal', 'level', 'trainingDays', 'equipment',
+              'weightUnit', 'onboardingStatus', 'createdAt', 'updatedAt', 'schemaVersion'];
+    }
+
+    // A list with no duplicates whose items all belong to `allowed`.
+    function isSubsetList(value, allowed, maxSize) {
+      return value is list
+        && value.size() <= maxSize
+        && value.toSet().size() == value.size()
+        && value.toSet().difference(allowed.toSet()).size() == 0;
+    }
+
+    function validProfile(d) {
+      return d.keys().hasOnly(profileFields())
+        && d.keys().hasAll(profileFields())
+        && d.displayName is string && d.displayName.size() <= 40
+        && (d.goal == null || d.goal in ['muscle', 'strength', 'fat_loss', 'maintenance'])
+        && (d.level == null || d.level in ['beginner', 'intermediate', 'advanced'])
+        && isSubsetList(d.trainingDays, [1, 2, 3, 4, 5, 6, 7], 7)
+        && isSubsetList(d.equipment, ['full_gym', 'dumbbells', 'barbell', 'machines',
+                                      'cables', 'kettlebells', 'bands', 'bodyweight'], 8)
+        && d.weightUnit in ['kg', 'lb']
+        && d.onboardingStatus in ['pending', 'completed', 'skipped']
+        && d.createdAt is timestamp
+        && d.updatedAt is timestamp
+        && d.schemaVersion == 1;
+    }
+
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+
+      allow create: if isOwner(uid)
+        && validProfile(request.resource.data)
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+
+      allow update: if isOwner(uid)
+        && validProfile(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.updatedAt == request.time;
+
+      // Lets a user remove their own profile (account deletion).
+      allow delete: if isOwner(uid);
+
+      // ---------- Custom exercises (no images) ----------
+      match /customExercises/{exerciseId} {
+        allow read, delete: if isOwner(uid);
+        allow create: if isOwner(uid) && validCustomExercise(request.resource.data)
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.updatedAt == request.time;
+        allow update: if isOwner(uid) && validCustomExercise(request.resource.data)
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.updatedAt == request.time;
+      }
+
+      // ---------- Routines ----------
+      // List items are validated client-side (rules cannot iterate lists); sizes are bounded here.
+      match /routines/{routineId} {
+        allow read, delete: if isOwner(uid);
+        allow create: if isOwner(uid) && validRoutine(request.resource.data)
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.updatedAt == request.time;
+        allow update: if isOwner(uid) && validRoutine(request.resource.data)
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.updatedAt == request.time;
+      }
+
+      // ---------- Workouts ----------
+      match /workouts/{workoutId} {
+        allow read, delete: if isOwner(uid);
+        allow create: if isOwner(uid) && validWorkout(request.resource.data)
+          && request.resource.data.createdAt == request.time;
+        allow update: if isOwner(uid) && validWorkout(request.resource.data)
+          && request.resource.data.createdAt == resource.data.createdAt;
+      }
+
+      // Achievements are derived from workouts on the client and never stored.
+    }
+
+    function muscles() {
+      return ['abdominals', 'abductors', 'adductors', 'biceps', 'calves', 'chest', 'forearms', 'glutes',
+              'hamstrings', 'lats', 'lower_back', 'middle_back', 'neck', 'quadriceps', 'shoulders', 'traps', 'triceps'];
+    }
+
+    function optionalInt(v, lo, hi) {
+      return v == null || (v is int && v >= lo && v <= hi);
+    }
+
+    function validCustomExercise(d) {
+      let fields = ['name', 'primaryMuscle', 'secondaryMuscles', 'equipment', 'type', 'instructions',
+                    'suggestedSets', 'suggestedRepsMin', 'suggestedRepsMax', 'createdAt', 'updatedAt', 'schemaVersion'];
+      return d.keys().hasOnly(fields) && d.keys().hasAll(fields)
+        && d.name is string && d.name.size() >= 1 && d.name.size() <= 80
+        && d.primaryMuscle in muscles()
+        && isSubsetList(d.secondaryMuscles, muscles(), 6)
+        && d.equipment in ['barbell', 'dumbbell', 'ez_bar', 'kettlebell', 'cable', 'machine', 'bands',
+                           'bodyweight', 'medicine_ball', 'exercise_ball', 'foam_roll', 'other', 'none']
+        && d.type in ['strength', 'stretching', 'cardio', 'plyometrics', 'powerlifting', 'olympic_weightlifting', 'strongman']
+        && d.instructions is string && d.instructions.size() <= 2000
+        && optionalInt(d.suggestedSets, 1, 20)
+        && optionalInt(d.suggestedRepsMin, 1, 100)
+        && optionalInt(d.suggestedRepsMax, 1, 100)
+        && d.createdAt is timestamp && d.updatedAt is timestamp && d.schemaVersion == 1;
+    }
+
+    function validRoutine(d) {
+      let fields = ['name', 'days', 'exercises', 'status', 'createdAt', 'updatedAt', 'schemaVersion'];
+      return d.keys().hasOnly(fields) && d.keys().hasAll(fields)
+        && d.name is string && d.name.size() >= 1 && d.name.size() <= 60
+        && isSubsetList(d.days, [1, 2, 3, 4, 5, 6, 7], 7)
+        && d.exercises is list && d.exercises.size() <= 30
+        && d.status in ['active', 'archived']
+        && d.createdAt is timestamp && d.updatedAt is timestamp && d.schemaVersion == 1;
+    }
+
+    function validWorkout(d) {
+      let fields = ['routineId', 'routineName', 'status', 'source', 'startedAt', 'endedAt', 'localDate', 'pausedAt',
+                    'pausedMs', 'exercises', 'notes', 'weightUnit', 'exerciseKeys', 'summary', 'revision',
+                    'createdAt', 'updatedAt', 'schemaVersion'];
+      return d.keys().hasOnly(fields) && d.keys().hasAll(fields)
+        && (d.routineId == null || (d.routineId is string && d.routineId.size() <= 128))
+        && d.routineName is string && d.routineName.size() <= 60
+        && d.status in ['active', 'completed']
+        && d.source in ['live', 'manual']
+        && d.startedAt is number
+        && (d.endedAt == null || d.endedAt is number)
+        && d.localDate is string && d.localDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && (d.pausedAt == null || d.pausedAt is number)
+        && d.pausedMs is number && d.pausedMs >= 0
+        && d.exercises is list && d.exercises.size() <= 40
+        && d.notes is string && d.notes.size() <= 1000
+        && d.weightUnit in ['kg', 'lb']
+        && d.exerciseKeys is list && d.exerciseKeys.size() <= 40
+        && (d.summary == null || d.summary is map)
+        && d.revision is int && d.revision >= 0
+        && d.createdAt is timestamp && d.updatedAt is timestamp && d.schemaVersion == 1;
+    }
+
+    // Global exercise catalogue (if ever synced from an authorised source):
+    // readable by signed-in users, never writable from the client.
+    match /exercises/{exerciseId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+  }
+}
