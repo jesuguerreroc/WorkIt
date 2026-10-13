@@ -11,6 +11,7 @@ import { deleteCustomExercise } from '@/services/customExerciseService'
 import { exerciseProvider } from '@/services/exerciseApi'
 import type { Exercise } from '@/types/exercise'
 import { ExerciseImage } from './ExerciseImage'
+import { ExerciseHistory, ExerciseStats } from './ExerciseProgress'
 import { equipmentLabels, exerciseTypeLabels, levelLabels, muscleLabels } from './taxonomy'
 import { useCustomExercises, useExerciseCatalog } from './useExercises'
 
@@ -62,8 +63,15 @@ function BackLink() {
   )
 }
 
+const TABS = [
+  { id: 'resumen', label: 'Resumen' },
+  { id: 'guia', label: 'Guía' },
+  { id: 'historial', label: 'Historial' },
+] as const
+
 function ExerciseDetail({ exercise }: { exercise: Exercise }) {
   const isCustom = exercise.ref.source === 'custom'
+  const [tab, setTab] = useState<(typeof TABS)[number]['id']>('resumen')
 
   return (
     <article className="mx-auto flex max-w-5xl flex-col gap-6">
@@ -113,30 +121,53 @@ function ExerciseDetail({ exercise }: { exercise: Exercise }) {
         </div>
       </div>
 
-      <section aria-labelledby="instructions-title" className="rounded-3xl border border-border bg-surface p-5 sm:p-6">
-        <h2 id="instructions-title" className="font-display text-2xl font-bold uppercase">
-          Cómo se hace
-        </h2>
-        {exercise.instructions.length === 0 ? (
-          <p className="mt-2 text-muted">No hay instrucciones para este ejercicio.</p>
-        ) : (
-          <>
-            {exercise.instructionsLanguage === 'en' && (
-              <p className="mt-1 text-sm text-muted">Instrucciones de la fuente original, en inglés.</p>
-            )}
-            <ol className="mt-4 flex flex-col gap-3" lang={exercise.instructionsLanguage}>
-              {exercise.instructions.map((step, index) => (
-                <li key={index} className="flex gap-3">
-                  <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary-soft text-sm font-bold text-primary tabular-nums">
-                    {index + 1}
-                  </span>
-                  <span className="text-muted">{step}</span>
-                </li>
-              ))}
-            </ol>
-          </>
+      <div role="tablist" aria-label="Secciones del ejercicio" className="flex gap-1 border-b border-border">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            id={`tab-${t.id}`}
+            aria-selected={tab === t.id}
+            aria-controls={`panel-${t.id}`}
+            onClick={() => setTab(t.id)}
+            className={`-mb-px min-h-12 flex-1 border-b-2 px-3 font-semibold transition-colors sm:flex-none ${tab === t.id ? 'border-primary text-fg' : 'border-transparent text-muted hover:text-fg'}`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+      <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
+        {tab === 'resumen' && <ExerciseStats exercise={exercise} />}
+        {tab === 'guia' && (
+        <section aria-labelledby="instructions-title" className="rounded-3xl bg-surface p-5 sm:p-6">
+          <h2 id="instructions-title" className="font-display text-2xl font-bold uppercase">
+            Cómo se hace
+          </h2>
+          {exercise.instructions.length === 0 ? (
+            <p className="mt-2 text-muted">No hay instrucciones para este ejercicio.</p>
+          ) : (
+            <>
+              {exercise.instructionsLanguage === 'en' && (
+                <p className="mt-1 text-sm text-muted">Instrucciones de la fuente original, en inglés.</p>
+              )}
+              <ol className="mt-4 flex flex-col gap-3" lang={exercise.instructionsLanguage}>
+                {exercise.instructions.map((step, index) => (
+                  <li key={index} className="flex gap-3">
+                    <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary-soft text-sm font-bold text-primary tabular-nums">
+                      {index + 1}
+                    </span>
+                    <span className="text-muted">{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </>
+          )}
+        </section>
+
         )}
-      </section>
+        {tab === 'historial' && <ExerciseHistory exercise={exercise} />}
+      </div>
 
       {!isCustom && (
         <p className="text-sm text-muted">

@@ -139,7 +139,11 @@ function RoutineCard({ routine, onStart }: { routine: Routine; onStart?: () => v
     <article className="flex h-full flex-col gap-4 rounded-3xl border border-border bg-surface p-5">
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="font-display text-2xl leading-tight font-bold uppercase">{routine.name}</h2>
+          <h2 className="font-display text-2xl leading-tight font-bold uppercase">
+            <Link to={`/app/rutinas/${routine.id}`} className="hover:text-primary hover:underline">
+              {routine.name}
+            </Link>
+          </h2>
           <p className="mt-1 text-sm text-muted">
             {routine.exercises.length} {routine.exercises.length === 1 ? 'ejercicio' : 'ejercicios'} · {totalSets} series
             {routine.days.length > 0 && <> · {dayLabels(routine)}</>}

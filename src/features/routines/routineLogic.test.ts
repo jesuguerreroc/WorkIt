@@ -57,3 +57,12 @@ describe('parseNumber', () => {
     expect(parseNumber('8.5', 'integer')).toBeUndefined()
   })
 })
+
+describe('estimateRoutineMinutes', () => {
+  it('adds set work time and configured rests, rounded to 5 min', async () => {
+    const { estimateRoutineMinutes } = await import('./routineLogic')
+    // Example routine: 12 sets × 45 s = 9 min, rests 2×(120+90+60+60) s = 11 min, 3 changes × 120 s = 6 min → 26 → 25.
+    expect(estimateRoutineMinutes(exampleRoutineExercises())).toBe(25)
+    expect(estimateRoutineMinutes([])).toBe(5)
+  })
+})

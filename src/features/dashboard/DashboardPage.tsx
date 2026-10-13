@@ -5,6 +5,7 @@ import { Button, ButtonLink } from '@/components/ui/Button'
 import { useAuth } from '@/features/auth/authContext'
 import { isoWeekday, weekdayName } from '@/features/profile/profileOptions'
 import { weeklyBuckets } from '@/features/progress/progressData'
+import { estimateRoutineMinutes } from '@/features/routines/routineLogic'
 import { useRoutines } from '@/features/routines/useRoutines'
 import { countedWorkouts } from '@/features/streaks/achievements'
 import { StreakWeek } from '@/features/streaks/StreakWeek'
@@ -202,10 +203,14 @@ function TodayRoutine({ routine, onStart, disabled }: { routine: Routine; onStar
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
-        <p className="font-display text-3xl leading-tight font-bold uppercase">{routine.name}</p>
-        <p className="text-muted">
-          {routine.exercises.length} ejercicios · {sets} series
-        </p>
+        <Link to={`/app/rutinas/${routine.id}`} className="group block">
+          <p className="font-display text-3xl leading-tight font-bold uppercase group-hover:text-primary">{routine.name}</p>
+          <p className="flex items-center gap-1 text-muted">
+            {routine.exercises.length} ejercicios · {sets} series · ≈ {estimateRoutineMinutes(routine.exercises)} min
+            <span className="ml-1 font-semibold text-primary">Ver rutina</span>
+            <ChevronRight className="size-4 text-primary" aria-hidden="true" />
+          </p>
+        </Link>
       </div>
       <Button size="lg" onClick={onStart} disabled={disabled || routine.exercises.length === 0}>
         <Play className="size-5 fill-current" aria-hidden="true" />

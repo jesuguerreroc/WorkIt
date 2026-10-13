@@ -83,3 +83,11 @@ export const levelLabels: Record<ExerciseLevel, string> = {
   intermediate: 'Intermedio',
   expert: 'Avanzado',
 }
+
+/** The filter group a detailed muscle belongs to (null for neck, adductors…). */
+export function muscleGroupOf(muscle: Muscle): MuscleGroup | null {
+  for (const [group, members] of Object.entries(muscleGroupMembers) as Array<[MuscleGroup, Muscle[]]>) {
+    if (members.includes(muscle)) return group
+  }
+  return null
+}

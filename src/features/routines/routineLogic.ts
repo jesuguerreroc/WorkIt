@@ -103,3 +103,19 @@ export function exampleRoutineExercises(): RoutineExercise[] {
     item('Triceps_Pushdown', 'Extensión de tríceps en polea', 10, 15, 60),
   ]
 }
+
+/** Rough working time of one set, used only for the duration estimate. */
+export const SECONDS_PER_SET = 45
+
+/**
+ * Estimated minutes for a routine: work time per set plus the configured rests
+ * (between sets, and between exercises except after the last one). Rounded to 5 min.
+ */
+export function estimateRoutineMinutes(exercises: RoutineExercise[]): number {
+  let seconds = 0
+  exercises.forEach((e, i) => {
+    seconds += e.sets * SECONDS_PER_SET + Math.max(0, e.sets - 1) * e.restBetweenSets
+    if (i < exercises.length - 1) seconds += e.restAfterExercise
+  })
+  return Math.max(5, Math.round(seconds / 60 / 5) * 5)
+}
