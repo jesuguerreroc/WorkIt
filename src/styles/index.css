@@ -37,6 +37,7 @@
   --animate-rise: rise 400ms var(--ease-out-quart) both;
   --animate-float: float 6s ease-in-out infinite;
   --animate-pop: pop 450ms var(--ease-out-quart) both;
+  --animate-flash: flash 1400ms ease-out both;
 
   @keyframes rise {
     from {
@@ -56,6 +57,25 @@
     }
     50% {
       transform: translateY(-10px);
+    }
+  }
+
+  /* End-of-rest screen flash: two soft pulses (well under 3 flashes per second). */
+  @keyframes flash {
+    0% {
+      opacity: 0;
+    }
+    12% {
+      opacity: 0.5;
+    }
+    35% {
+      opacity: 0.08;
+    }
+    50% {
+      opacity: 0.4;
+    }
+    100% {
+      opacity: 0;
     }
   }
 

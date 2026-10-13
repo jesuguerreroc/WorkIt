@@ -2,35 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNow } from '@/hooks/useNow'
 import { REST_STEP_SECONDS } from '@/types/routine'
 import { localSession, type RestTimerState } from './localSession'
+import { loadRestAlertSettings, ringBell, tick, unlockAudio, vibrateRestEnd } from './restAlerts'
 import type { RestPlan } from './workoutActions'
-
-let audio: AudioContext | null = null
-
-/** Created during a tap (browsers only allow audio after a user gesture). */
-function unlockAudio() {
-  try {
-    audio ??= new AudioContext()
-    if (audio.state === 'suspended') void audio.resume()
-  } catch {
-    audio = null
-  }
-}
-
-function beep() {
-  if (!audio) return
-  const start = audio.currentTime
-  for (const offset of [0, 0.22, 0.44]) {
-    const osc = audio.createOscillator()
-    const gain = audio.createGain()
-    osc.frequency.value = 880
-    gain.gain.setValueAtTime(0.0001, start + offset)
-    gain.gain.exponentialRampToValueAtTime(0.25, start + offset + 0.02)
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + offset + 0.16)
-    osc.connect(gain).connect(audio.destination)
-    osc.start(start + offset)
-    osc.stop(start + offset + 0.18)
-  }
-}
 
 /**
  * Rest countdown based on an end timestamp (robust to throttled background tabs
@@ -42,6 +15,7 @@ export function useRestTimer(uid: string | undefined, workoutId: string) {
   const running = rest !== null && rest.endsAt !== null
   const now = useNow(250, running)
   const notified = useRef(false)
+  const lastTick = useRef<number | null>(null)
 
   const persist = useCallback(
     (next: RestTimerState | null) => {
@@ -56,11 +30,21 @@ export function useRestTimer(uid: string | undefined, workoutId: string) {
   useEffect(() => {
     if (!rest || rest.endsAt === null || remainingMs > 0 || notified.current) return
     notified.current = true
-    navigator.vibrate?.([200, 100, 200])
-    beep()
+    const settings = loadRestAlertSettings()
+    if (settings.vibration) vibrateRestEnd()
+    if (settings.sound) ringBell()
     persist(null)
     setJustFinished(true)
   }, [rest, remainingMs, persist])
+
+  // 3-2-1 ticks, once per second, only while the countdown is running.
+  const secondsLeft = Math.ceil(remainingMs / 1000)
+  useEffect(() => {
+    if (!running || secondsLeft > 3 || secondsLeft < 1 || lastTick.current === secondsLeft) return
+    lastTick.current = secondsLeft
+    const settings = loadRestAlertSettings()
+    if (settings.sound && settings.countdown) tick(secondsLeft === 1)
+  }, [running, secondsLeft])
 
   // Own effect so clearing the rest above does not cancel this timeout.
   useEffect(() => {
@@ -73,6 +57,7 @@ export function useRestTimer(uid: string | undefined, workoutId: string) {
     (plan: RestPlan) => {
       unlockAudio()
       notified.current = false
+      lastTick.current = null
       setJustFinished(false)
       persist({ endsAt: Date.now() + plan.seconds * 1000, pausedRemaining: null, total: plan.seconds, label: plan.label })
     },
@@ -85,6 +70,7 @@ export function useRestTimer(uid: string | undefined, workoutId: string) {
       if (!rest) return
       unlockAudio()
       const remaining = Math.max(0, remainingMs + deltaSeconds * 1000)
+      lastTick.current = null
       const total = Math.max(rest.total, Math.ceil(remaining / 1000))
       if (rest.endsAt === null) persist({ ...rest, pausedRemaining: remaining, total })
       else persist({ ...rest, endsAt: Date.now() + remaining, total })

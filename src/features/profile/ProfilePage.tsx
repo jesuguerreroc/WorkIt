@@ -7,6 +7,7 @@ import { getAuthErrorMessage, resendVerificationEmail, signOut } from '@/service
 import { saveProfilePreferences } from '@/services/profileService'
 import { preferencesOf } from './preferences'
 import { ProfileForm } from './ProfileForm'
+import { RestAlertSettings } from './RestAlertSettings'
 
 export function ProfilePage() {
   const { user, profile } = useAuth()
@@ -17,6 +18,8 @@ export function ProfilePage() {
       <h1 className="text-[1.75rem] leading-tight font-bold tracking-tight sm:text-3xl">Perfil</h1>
 
       <AccountSection />
+
+      <RestAlertSettings />
 
       <section aria-labelledby="preferences-title" className="flex flex-col gap-6">
         <div>

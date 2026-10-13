@@ -11,16 +11,20 @@ export function RestTimerBar({ timer, paused }: { timer: ReturnType<typeof useRe
 
   if (!rest && justFinished) {
     return (
-      <div role="status" className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-        <button
-          type="button"
-          onClick={dismiss}
-          className="mx-auto flex w-full max-w-3xl items-center gap-3 rounded-full bg-primary px-6 py-4 text-left font-semibold text-on-primary shadow-2xl motion-safe:animate-rise"
-        >
-          <BellRing className="size-6" aria-hidden="true" />
-          Descanso terminado. ¡A por la siguiente serie!
-        </button>
-      </div>
+      <>
+        {/* Full-screen lime flash: visible even when the bell cannot be heard. */}
+        <div className="pointer-events-none fixed inset-0 z-50 bg-primary opacity-0 motion-safe:animate-flash" aria-hidden="true" />
+        <div role="status" className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+          <button
+            type="button"
+            onClick={dismiss}
+            className="mx-auto flex w-full max-w-3xl items-center gap-3 rounded-full bg-primary px-6 py-4 text-left font-semibold text-on-primary shadow-2xl motion-safe:animate-rise"
+          >
+            <BellRing className="size-6" aria-hidden="true" />
+            Descanso terminado. ¡A por la siguiente serie!
+          </button>
+        </div>
+      </>
     )
   }
   if (!rest) return null
