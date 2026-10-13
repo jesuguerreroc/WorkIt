@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { BookOpen, Check, Minus, NotebookPen, Plus, Repeat, TrendingUp, X } from 'lucide-react'
+import { BookOpen, Check, Disc3, Minus, NotebookPen, Plus, Repeat, TrendingUp, X } from 'lucide-react'
 import { NumericField } from '@/components/ui/NumericField'
 import { ExerciseImage } from '@/features/exercises/ExerciseImage'
 import { formatRest } from '@/features/routines/routineLogic'
@@ -24,6 +24,7 @@ interface ExerciseFocusProps {
   onHowTo: () => void
   onReplace: () => void
   onOptions: () => void
+  onPlates: () => void
   onApplySuggestion: (weight: number) => void
   onDismissSuggestion: () => void
 }
@@ -70,6 +71,9 @@ export function ExerciseFocus(props: ExerciseFocusProps) {
           </Chip>
           <Chip onClick={props.onReplace} icon={<Repeat className="size-4" aria-hidden="true" />}>
             Reemplazar
+          </Chip>
+          <Chip onClick={props.onPlates} icon={<Disc3 className="size-4" aria-hidden="true" />}>
+            Discos
           </Chip>
           <Chip onClick={props.onOptions} icon={<NotebookPen className="size-4" aria-hidden="true" />}>
             Notas y descansos

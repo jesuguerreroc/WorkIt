@@ -9,5 +9,7 @@ export function preferencesOf(profile: UserProfile): ProfilePreferences {
     trainingDays: profile.trainingDays,
     equipment: profile.equipment,
     weightUnit: profile.weightUnit,
+    streakMode: profile.streakMode,
+    streakAllowedMisses: profile.streakAllowedMisses,
   }
 }

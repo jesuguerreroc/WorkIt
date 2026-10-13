@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { addDays, daysBetween, isValidDateKey, localDateKey, startOfWeek } from '@/lib/dates'
+import type { Weekday } from '@/types/profile'
 import { computeStreaks, firstDayReachingStreak } from './streaks'
 
 describe('date keys', () => {
@@ -96,9 +97,40 @@ describe('computeStreaks', () => {
 
 describe('firstDayReachingStreak', () => {
   it('returns the day a milestone was first reached', () => {
-    const days = ['2026-10-01', '2026-10-02', '2026-10-04', '2026-10-05', '2026-10-06']
-    expect(firstDayReachingStreak(days, 3)).toBe('2026-10-06')
-    expect(firstDayReachingStreak(days, 2)).toBe('2026-10-02')
-    expect(firstDayReachingStreak(days, 7)).toBeNull()
+    const s = computeStreaks(['2026-10-01', '2026-10-02', '2026-10-04', '2026-10-05', '2026-10-06'], '2026-10-12')
+    expect(firstDayReachingStreak(s, 3)).toBe('2026-10-06')
+    expect(firstDayReachingStreak(s, 2)).toBe('2026-10-02')
+    expect(firstDayReachingStreak(s, 7)).toBeNull()
+  })
+})
+
+describe('flexible streaks', () => {
+  // Plan Monday–Friday; 2026-10-05 is a Monday.
+  const flex = (allowedMisses: number) => ({ mode: 'flexible' as const, plannedDays: [1, 2, 3, 4, 5] as Weekday[], allowedMisses })
+
+  it('skipping one planned day keeps the streak but does not count it', () => {
+    // Mon, Tue, (skip Wed), Thu, Fri
+    const s = computeStreaks(['2026-10-05', '2026-10-06', '2026-10-08', '2026-10-09'], '2026-10-09', flex(1))
+    expect(s.current).toBe(4)
+  })
+
+  it('unplanned days (weekend) never break it', () => {
+    const s = computeStreaks(['2026-10-08', '2026-10-09', '2026-10-12'], '2026-10-12', flex(0))
+    expect(s.current).toBe(3)
+  })
+
+  it('missing more planned days in a row than allowed breaks it', () => {
+    // Mon, Tue, then miss Wed+Thu (2 > 1 allowed), Fri
+    const s = computeStreaks(['2026-10-05', '2026-10-06', '2026-10-09'], '2026-10-09', flex(1))
+    expect(s).toMatchObject({ current: 1, best: 2 })
+  })
+
+  it('today being open never counts as a miss', () => {
+    const s = computeStreaks(['2026-10-08', '2026-10-09'], '2026-10-12', flex(0))
+    expect(s).toMatchObject({ current: 2, pendingToday: true, trainedToday: false })
+  })
+
+  it('strict mode keeps the original rules', () => {
+    expect(computeStreaks(['2026-10-05', '2026-10-06', '2026-10-08'], '2026-10-08').current).toBe(1)
   })
 })

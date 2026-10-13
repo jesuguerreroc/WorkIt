@@ -50,6 +50,8 @@ export const router = createBrowserRouter([
             children: [
               { index: true, ...lazyPage(() => import('@/features/dashboard/DashboardPage'), 'DashboardPage') },
               { path: 'rutinas', ...lazyPage(() => import('@/features/routines/RoutinesPage'), 'RoutinesPage') },
+              { path: 'programas', ...lazyPage(() => import('@/features/programs/ProgramsPage'), 'ProgramsPage') },
+              { path: 'programas/:id', ...lazyPage(() => import('@/features/programs/ProgramsPage'), 'ProgramDetailPage') },
               { path: 'rutinas/:id', ...lazyPage(() => import('@/features/routines/RoutineDetailPage'), 'RoutineDetailPage') },
               { path: 'rutinas/nueva', ...lazyPage(() => import('@/features/routines/RoutineEditorPage'), 'RoutineEditorPage') },
               { path: 'rutinas/:id/editar', ...lazyPage(() => import('@/features/routines/RoutineEditorPage'), 'RoutineEditorPage') },

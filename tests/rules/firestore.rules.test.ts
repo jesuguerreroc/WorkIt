@@ -144,6 +144,13 @@ describe('users/{uid} — update validation', () => {
     )
   })
 
+  it('accepts the optional streak settings and validates them', async () => {
+    await seedAlice()
+    await assertSucceeds(updateDoc(doc(alice(), 'users/alice'), { streakMode: 'flexible', streakAllowedMisses: 1, updatedAt: serverTimestamp() }))
+    await assertFails(updateDoc(doc(alice(), 'users/alice'), { streakMode: 'lazy', updatedAt: serverTimestamp() }))
+    await assertFails(updateDoc(doc(alice(), 'users/alice'), { streakAllowedMisses: 9, updatedAt: serverTimestamp() }))
+  })
+
   it('rejects changing createdAt', async () => {
     await seedAlice()
     await assertFails(updateDoc(doc(alice(), 'users/alice'), { createdAt: serverTimestamp(), updatedAt: serverTimestamp() }))

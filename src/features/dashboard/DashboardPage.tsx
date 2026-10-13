@@ -10,6 +10,7 @@ import { useRoutines } from '@/features/routines/useRoutines'
 import { countedWorkouts } from '@/features/streaks/achievements'
 import { StreakWeek } from '@/features/streaks/StreakWeek'
 import { computeStreaks } from '@/features/streaks/streaks'
+import { streakOptionsOf } from '@/features/streaks/streakOptions'
 import { StartConflictDialog } from '@/features/workouts/StartConflictDialog'
 import { useStartWorkout, workoutPath } from '@/features/workouts/useStartWorkout'
 import { formatDuration, formatLongDate, formatShortDate, localDateKey } from '@/lib/dates'
@@ -29,7 +30,7 @@ export function DashboardPage() {
   const { active, history } = starter
 
   const counted = useMemo(() => countedWorkouts(history), [history])
-  const streak = useMemo(() => computeStreaks(counted.map((w) => w.localDate), todayKey), [counted, todayKey])
+  const streak = useMemo(() => computeStreaks(counted.map((w) => w.localDate), todayKey, streakOptionsOf(profile)), [counted, todayKey, profile])
   // Volume here is already in the user's unit.
   const thisWeek = useMemo(() => weeklyBuckets(history, todayKey, 1, unit)[0], [history, todayKey, unit])
   const trainedDays = useMemo(() => new Set(streak.days), [streak.days])
@@ -232,9 +233,9 @@ function FirstSteps() {
           <Plus className="size-4" aria-hidden="true" />
           Crear rutina
         </ButtonLink>
-        <ButtonLink to="/app/rutinas" variant="secondary">
+        <ButtonLink to="/app/programas" variant="secondary">
           <CalendarDays className="size-4" aria-hidden="true" />
-          Usar una rutina de ejemplo
+          Explorar programas
         </ButtonLink>
       </div>
     </div>

@@ -8,13 +8,14 @@ import { exerciseSeries } from '@/features/progress/progressData'
 import { countedWorkouts } from '@/features/streaks/achievements'
 import { formatVolume } from '@/features/workouts/format'
 import { useWorkoutHistory } from '@/features/workouts/useWorkouts'
+import { bestOneRepMax, repRecords } from '@/features/workouts/strength'
 import { bestsByExercise, fromKg, isWorkingSet, roundWeight } from '@/features/workouts/workoutMath'
 import { useToday } from '@/hooks/useToday'
 import { addDays, formatShortDate } from '@/lib/dates'
 import { formatNumber } from '@/lib/numbers'
 import { exerciseKey, type Exercise } from '@/types/exercise'
 
-type Metric = 'volume' | 'topWeight' | 'bestReps'
+type Metric = 'volume' | 'topWeight' | 'bestReps' | 'e1rm'
 type Period = '30' | '90' | 'all'
 
 const integer = new Intl.NumberFormat('es', { maximumFractionDigits: 0 })
@@ -30,9 +31,12 @@ export function ExerciseStats({ exercise }: { exercise: Exercise }) {
 
   const all = useMemo(() => exerciseSeries(workouts, exercise.key, unit), [workouts, exercise.key, unit])
   const bests = useMemo(() => bestsByExercise(workouts).get(exercise.key), [workouts, exercise.key])
+  const oneRm = useMemo(() => bestOneRepMax(workouts, exercise.key, unit), [workouts, exercise.key, unit])
+  const records = useMemo(() => repRecords(workouts, exercise.key, unit), [workouts, exercise.key, unit])
+  const valueOf = (p: (typeof all)[number]) => (metric === 'volume' ? p.volume : metric === 'topWeight' ? p.topWeight : metric === 'e1rm' ? p.e1rm : p.bestReps)
   const from = period === 'all' ? null : addDays(today, -Number(period))
   const series = all.filter((p) => !from || p.date >= from)
-  const values = series.map((p) => (metric === 'volume' ? p.volume : metric === 'topWeight' ? p.topWeight : p.bestReps)).filter((v): v is number => v !== null)
+  const values = series.map(valueOf).filter((v): v is number => v !== null)
   const average = values.length ? values.reduce((a, b) => a + b, 0) / values.length : null
   const metricUnit = metric === 'bestReps' ? 'reps' : unit
 
@@ -47,7 +51,10 @@ export function ExerciseStats({ exercise }: { exercise: Exercise }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <Stat label="1RM estimado" hint={oneRm ? `De ${formatNumber(oneRm.weight)} ${unit} × ${oneRm.reps}` : 'Necesita series de 1 a 12 reps con peso'}>
+          {oneRm ? `${formatNumber(oneRm.value)} ${unit}` : '—'}
+        </Stat>
         <Stat label="Veces realizado">{all.length}</Stat>
         <Stat label="Peso máximo">{bests && bests.weightKg > 0 ? `${formatNumber(roundWeight(fromKg(bests.weightKg, unit)))} ${unit}` : '—'}</Stat>
         <Stat label="Mejor serie">{bests && bests.setVolumeKg > 0 ? formatVolume(bests.setVolumeKg, unit) : '—'}</Stat>
@@ -63,6 +70,7 @@ export function ExerciseStats({ exercise }: { exercise: Exercise }) {
             { value: 'volume', label: 'Volumen por sesión' },
             { value: 'topWeight', label: 'Peso máximo' },
             { value: 'bestReps', label: 'Repeticiones máximas' },
+            { value: 'e1rm', label: '1RM estimado' },
           ]}
         />
         <Select
@@ -88,16 +96,43 @@ export function ExerciseStats({ exercise }: { exercise: Exercise }) {
             ? 'Peso × repeticiones de tus series de trabajo en cada sesión'
             : metric === 'topWeight'
               ? 'Tu serie de trabajo más pesada en cada sesión (carga levantada, no peso corporal)'
+              : metric === 'e1rm'
+              ? 'Estimación (fórmula de Epley) a partir de tu mejor serie de 1 a 12 repeticiones'
               : 'La serie con más repeticiones en cada sesión'
         }
         empty={series.length < 2 ? 'Necesitas al menos 2 sesiones en este periodo para ver la evolución.' : null}
         table={{
           columns: ['Fecha', metricUnit],
-          rows: series.map((p) => [p.label, (metric === 'volume' ? p.volume : metric === 'topWeight' ? p.topWeight : p.bestReps) ?? '—']),
+          rows: series.map((p) => [p.label, valueOf(p) ?? '—']),
         }}
       >
         <SingleLineChart data={series} dataKey={metric} unit={metricUnit} />
       </ChartFrame>
+
+      <section aria-labelledby="rep-records-title" className="rounded-3xl bg-surface p-4 sm:p-5">
+        <h3 id="rep-records-title" className="font-semibold">
+          Récords por repeticiones
+        </h3>
+        <p className="text-sm text-muted">El mayor peso que has movido al menos ese número de repeticiones.</p>
+        <table className="mt-3 w-full text-left tabular-nums">
+          <thead className="text-sm text-muted">
+            <tr>
+              <th scope="col" className="py-1 font-medium">Reps</th>
+              <th scope="col" className="py-1 font-medium">Peso</th>
+              <th scope="col" className="py-1 font-medium">Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            {records.map((r) => (
+              <tr key={r.reps} className="border-t border-border">
+                <td className="py-2 font-semibold">{r.reps === 1 ? '1 (máx.)' : `${r.reps}+`}</td>
+                <td className="py-2">{r.weight !== null ? `${formatNumber(r.weight)} ${unit}` : '—'}</td>
+                <td className="py-2 text-sm text-muted">{r.date ? formatShortDate(r.date) : ''}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
     </div>
   )
 }
@@ -143,11 +178,12 @@ export function ExerciseHistory({ exercise }: { exercise: Exercise }) {
   )
 }
 
-function Stat({ label, children }: { label: string; children: ReactNode }) {
+function Stat({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
   return (
     <div className="rounded-2xl bg-surface p-4">
       <dt className="text-sm text-muted">{label}</dt>
       <dd className="mt-1 font-display text-2xl font-bold">{children}</dd>
+      {hint && <dd className="text-xs text-subtle">{hint}</dd>}
     </div>
   )
 }

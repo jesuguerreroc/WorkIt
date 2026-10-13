@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { Workout, WorkoutExercise, WorkoutSet } from '@/types/workout'
 import { computeAchievements } from '@/features/streaks/achievements'
+import { computeStreaks } from '@/features/streaks/streaks'
 import { suggestProgression } from './progression'
 import {
   detectRecords,
@@ -166,7 +167,7 @@ describe('achievements', () => {
     const days = ['2026-10-01', '2026-10-02', '2026-10-03']
     const sessions = days.map((d, i) => workout(`w${i}`, d, [exercise('bench', [set(60, 10)])]))
     const invalid = workout('x', '2026-10-04', [exercise('bench', [set(60, 10, { done: false })])])
-    const list = computeAchievements([...sessions, invalid], 3)
+    const list = computeAchievements([...sessions, invalid], computeStreaks(days, '2026-10-12'))
     expect(list.find((a) => a.id === 'sessions-1')?.achievedOn).toBe('2026-10-01')
     expect(list.find((a) => a.id === 'sessions-10')?.achievedOn).toBeNull()
     expect(list.find((a) => a.id === 'streak-3')?.achievedOn).toBe('2026-10-03')

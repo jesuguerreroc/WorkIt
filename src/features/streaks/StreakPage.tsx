@@ -7,15 +7,19 @@ import { useWorkoutHistory } from '@/features/workouts/useWorkouts'
 import { useToday } from '@/hooks/useToday'
 import { countedWorkouts } from './achievements'
 import { computeStreaks } from './streaks'
+import { streakOptionsOf } from './streakOptions'
+import { useAuth } from '@/features/auth/authContext'
 import { StreakWeek } from './StreakWeek'
 
 export function StreakPage() {
   const navigate = useNavigate()
+  const { profile } = useAuth()
+  const flexible = profile?.streakMode === 'flexible'
   const today = useToday()
   const { workouts, status } = useWorkoutHistory()
   const [help, setHelp] = useState(false)
   const counted = useMemo(() => countedWorkouts(workouts), [workouts])
-  const streak = useMemo(() => computeStreaks(counted.map((w) => w.localDate), today), [counted, today])
+  const streak = useMemo(() => computeStreaks(counted.map((w) => w.localDate), today, streakOptionsOf(profile)), [counted, today, profile])
   const trained = useMemo(() => new Set(streak.days), [streak.days])
 
   return (
@@ -94,7 +98,18 @@ export function StreakPage() {
           <li>Suma un día cada día de calendario con al menos un entrenamiento terminado con alguna serie completada.</li>
           <li>Varios entrenamientos el mismo día cuentan como uno.</li>
           <li>Si hoy aún no has entrenado, tu racha de ayer sigue viva hasta que acabe el día.</li>
-          <li>Si pasa un día entero sin entrenar, la racha vuelve a empezar; tu mejor racha se conserva.</li>
+          {flexible ? (
+            <>
+              <li>Tienes la racha flexible: los días que no son de entrenamiento en tu perfil nunca la rompen.</li>
+              <li>
+                Puedes saltarte {profile?.streakAllowedMisses ?? 1} {profile?.streakAllowedMisses === 1 ? 'día planificado' : 'días planificados'}{' '}
+                seguidos sin perderla, pero esos días no suman.
+              </li>
+            </>
+          ) : (
+            <li>Si pasa un día entero sin entrenar, la racha vuelve a empezar; tu mejor racha se conserva.</li>
+          )}
+          <li>Puedes cambiar el tipo de racha en Perfil → Preferencias.</li>
           <li>Los entrenamientos que registres después (de días anteriores) también cuentan para su día.</li>
           <li>Descansar es parte del progreso: los días con luna son descansos.</li>
         </ul>

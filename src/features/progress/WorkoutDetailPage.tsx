@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { ArrowLeft, Trash2 } from 'lucide-react'
+import { ArrowLeft, Pencil, Trash2 } from 'lucide-react'
 import { Alert } from '@/components/ui/Alert'
-import { Button } from '@/components/ui/Button'
+import { Button, ButtonLink } from '@/components/ui/Button'
 import { ConfirmDialog } from '@/components/ui/Dialog'
 import { FullScreenStatus } from '@/components/ui/FullScreenStatus'
 import { useAuth } from '@/features/auth/authContext'
@@ -54,10 +54,16 @@ export function WorkoutDetailPage() {
       </header>
       <WorkoutReport workout={workout} unit={profile?.weightUnit ?? workout.weightUnit} />
       {error && <Alert tone="error">{error}</Alert>}
-      <Button variant="dangerGhost" className="self-start" onClick={() => setConfirming(true)}>
+      <div className="flex flex-col gap-2 sm:flex-row">
+      <ButtonLink to={`/app/entrenar/${workout.id}?editar=1`} variant="secondary">
+        <Pencil className="size-4" aria-hidden="true" />
+        Editar series
+      </ButtonLink>
+      <Button variant="dangerGhost" onClick={() => setConfirming(true)}>
         <Trash2 className="size-4" aria-hidden="true" />
         Eliminar entrenamiento
       </Button>
+      </div>
       <ConfirmDialog
         open={confirming}
         title="Eliminar entrenamiento"

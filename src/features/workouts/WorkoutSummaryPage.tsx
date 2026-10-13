@@ -4,6 +4,7 @@ import { ButtonLink } from '@/components/ui/Button'
 import { FullScreenStatus } from '@/components/ui/FullScreenStatus'
 import { useAuth } from '@/features/auth/authContext'
 import { computeStreaks } from '@/features/streaks/streaks'
+import { streakOptionsOf } from '@/features/streaks/streakOptions'
 import { countedWorkouts } from '@/features/streaks/achievements'
 import { useToday } from '@/hooks/useToday'
 import { useLiveWorkout, useWorkoutHistory } from './useWorkouts'
@@ -23,7 +24,7 @@ export function WorkoutSummaryPage() {
   const workout = live.workout
   // Include this session even if the history listener has not received it yet.
   const all = [workout, ...workouts.filter((w) => w.id !== workout.id)]
-  const streak = computeStreaks(countedWorkouts(all).map((w) => w.localDate), today)
+  const streak = computeStreaks(countedWorkouts(all).map((w) => w.localDate), today, streakOptionsOf(profile))
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-3xl flex-col gap-6 px-4 pt-[calc(2rem+env(safe-area-inset-top))] pb-8">

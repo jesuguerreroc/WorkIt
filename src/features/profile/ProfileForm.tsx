@@ -130,6 +130,40 @@ export function ProfileForm({
         onChange={([unit]) => unit && set('weightUnit', unit)}
       />
 
+      <ChoiceGroup
+        legend="Tipo de racha"
+        name="streakMode"
+        type="radio"
+        layout="card"
+        options={[
+          { value: 'strict', label: 'Estricta', description: 'Cuenta días seguidos entrenando.' },
+          {
+            value: 'flexible',
+            label: 'Flexible',
+            description: 'Los días que no entrenas según tu plan no la rompen; saltarte alguno suelto tampoco.',
+          },
+        ]}
+        selected={[values.streakMode]}
+        onChange={([mode]) => mode && set('streakMode', mode)}
+      />
+
+      {values.streakMode === 'flexible' && (
+        <ChoiceGroup
+          legend="Días planificados que puedes saltarte seguidos"
+          hint={
+            values.trainingDays.length === 0
+              ? 'Consejo: elige arriba tus días de entrenamiento; si no, todos los días cuentan como planificados.'
+              : 'Esos días no suman a la racha, pero tampoco la rompen.'
+          }
+          name="streakAllowedMisses"
+          type="radio"
+          layout="chip"
+          options={[0, 1, 2].map((n) => ({ value: n, label: n === 0 ? 'Ninguno' : String(n) }))}
+          selected={[values.streakAllowedMisses]}
+          onChange={([n]) => n !== undefined && set('streakAllowedMisses', n)}
+        />
+      )}
+
       <div className="flex flex-col gap-4">
         {status && <Alert tone={status.tone}>{status.message}</Alert>}
         <div className="flex flex-col gap-3 sm:flex-row">

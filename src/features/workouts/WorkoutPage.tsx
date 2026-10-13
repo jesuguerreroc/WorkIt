@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, Navigate, useNavigate, useParams } from 'react-router'
+import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router'
 import { ChevronDown, ChevronLeft, ChevronRight, Cloud, CloudOff, LoaderCircle, Pause, Play, Trash2, TriangleAlert } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { ConfirmDialog, Dialog } from '@/components/ui/Dialog'
@@ -25,11 +25,14 @@ import { useRestTimer } from './useRestTimer'
 import { useLiveWorkout, useWorkoutHistory, type SyncState } from './useWorkouts'
 import { ExerciseCarousel } from './ExerciseCarousel'
 import { ExerciseFocus } from './ExerciseFocus'
+import { PlateCalculatorDialog } from './PlateCalculatorDialog'
 import * as actions from './workoutActions'
-import { elapsedSeconds, isValidWorkout, previousPerformance } from './workoutMath'
+import { elapsedSeconds, isValidWorkout, previousPerformance, summarizeWorkout } from './workoutMath'
 
 export function WorkoutPage() {
   const { id = '' } = useParams()
+  const [params] = useSearchParams()
+  const editing = params.get('editar') === '1'
   const live = useLiveWorkout(id)
 
   if (live.status === 'loading') return <FullScreenStatus variant="loading" title="Abriendo entrenamiento…" />
@@ -43,8 +46,8 @@ export function WorkoutPage() {
       </FullScreenStatus>
     )
   }
-  if (live.workout.status === 'completed') return <Navigate to={`/app/entrenar/${id}/resumen`} replace />
-  return <LiveWorkout workout={live.workout} live={live} />
+  if (live.workout.status === 'completed' && !editing) return <Navigate to={`/app/entrenar/${id}/resumen`} replace />
+  return <LiveWorkout workout={live.workout} live={live} editing={editing && live.workout.status === 'completed'} />
 }
 
 /** Keeps the screen on during the session where supported (Screen Wake Lock API). */
@@ -64,11 +67,20 @@ function useWakeLock(enabled: boolean) {
   }, [enabled])
 }
 
-function LiveWorkout({ workout, live }: { workout: Workout; live: ReturnType<typeof useLiveWorkout> }) {
+function LiveWorkout({
+  workout,
+  live,
+  editing,
+}: {
+  workout: Workout
+  live: ReturnType<typeof useLiveWorkout>
+  /** Correcting a finished session: no clock, no rest timer, summary recomputed. */
+  editing: boolean
+}) {
   const { user } = useAuth()
   const navigate = useNavigate()
   const { workouts: history } = useWorkoutHistory()
-  const manual = workout.source === 'manual'
+  const manual = workout.source === 'manual' || editing
   const paused = workout.pausedAt !== null
   const timer = useRestTimer(user?.uid, workout.id)
   const now = useNow(1000, !manual && !paused)
@@ -80,6 +92,7 @@ function LiveWorkout({ workout, live }: { workout: Workout; live: ReturnType<typ
   const [finishing, setFinishing] = useState(false)
   const [howTo, setHowTo] = useState(false)
   const [replacing, setReplacing] = useState(false)
+  const [platesOpen, setPlatesOpen] = useState(false)
   const { resolve } = useAllExercises()
   // Start on the first exercise with pending sets (e.g. when resuming a session).
   const [current, setCurrent] = useState(() => Math.max(0, workout.exercises.findIndex((e) => e.sets.some((s) => !s.done))))
@@ -92,6 +105,8 @@ function LiveWorkout({ workout, live }: { workout: Workout; live: ReturnType<typ
 
   const unit = workout.weightUnit
   const pastHistory = useMemo(() => history.filter((w) => w.id !== workout.id), [history, workout.id])
+  const update = (change: (current: Workout) => Workout) =>
+    live.update(editing ? (w) => { const next = change(w); return { ...next, summary: summarizeWorkout(next, pastHistory, Date.now()) } } : change)
 
   const perExercise = useMemo(
     () =>
@@ -114,7 +129,7 @@ function LiveWorkout({ workout, live }: { workout: Workout; live: ReturnType<typ
     const previous = perExercise.get(item.id)?.previous
     let next: Workout | null = null
     // Computed from the latest state inside update(), so fast consecutive taps never overwrite each other.
-    live.update((current) => {
+    update((current) => {
       const exercise = current.exercises.find((e) => e.id === item.id)
       const index = exercise?.sets.findIndex((s) => s.id === setId) ?? -1
       const target = exercise?.sets[index]
@@ -145,15 +160,23 @@ function LiveWorkout({ workout, live }: { workout: Workout; live: ReturnType<typ
 
   const togglePause = () => {
     if (paused) {
-      live.update((w) => actions.resume(w, Date.now()))
+      update((w) => actions.resume(w, Date.now()))
       timer.unfreeze()
     } else {
-      live.update((w) => actions.pause(w, Date.now()))
+      update((w) => actions.pause(w, Date.now()))
       timer.freeze()
     }
   }
 
   const finish = async () => {
+    if (editing) {
+      if (!user) return
+      setFinishing(true)
+      const saved = { ...workout, revision: workout.revision + 1, summary: summarizeWorkout(workout, pastHistory, Date.now()) }
+      live.commit(saved).then(() => localSession.clear(user.uid, saved.id)).catch(() => {})
+      navigate(`/app/historial/${workout.id}`, { replace: true })
+      return
+    }
     if (!user) return
     setFinishing(true)
     const completed = completeWorkout(workout, pastHistory, Date.now())
@@ -183,16 +206,18 @@ function LiveWorkout({ workout, live }: { workout: Workout; live: ReturnType<typ
       <header className="sticky top-0 z-30 bg-canvas/95 pt-[env(safe-area-inset-top)] backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center gap-2 px-4 py-2">
           <Link
-            to="/app"
-            aria-label="Minimizar (el entrenamiento seguirá en curso)"
-            title="Minimizar: el entrenamiento seguirá en curso"
+            to={editing ? `/app/historial/${workout.id}` : '/app'}
+            aria-label={editing ? 'Volver al detalle (los cambios ya se guardan)' : 'Minimizar (el entrenamiento seguirá en curso)'}
+            title={editing ? 'Volver al detalle' : 'Minimizar: el entrenamiento seguirá en curso'}
             className="-ml-2 flex size-11 shrink-0 items-center justify-center rounded-xl text-fg hover:bg-surface-2"
           >
             <ChevronDown className="size-6" aria-hidden="true" />
           </Link>
           <div className="min-w-0 flex-1">
             {manual ? (
-              <p className="truncate font-semibold">Registro del {formatShortDate(workout.localDate)}</p>
+              <p className="truncate font-semibold">
+                {editing ? 'Editando' : 'Registro'} del {formatShortDate(workout.localDate)}
+              </p>
             ) : (
               <p className="font-display text-3xl leading-none font-bold tabular-nums" aria-label="Tiempo de entrenamiento">
                 {formatClock(elapsedSeconds(workout, now))}
@@ -213,8 +238,12 @@ function LiveWorkout({ workout, live }: { workout: Workout; live: ReturnType<typ
               {paused ? <Play className="size-5 fill-current" aria-hidden="true" /> : <Pause className="size-5" aria-hidden="true" />}
             </button>
           )}
-          <Button variant="secondary" onClick={() => setFinishOpen(true)}>
-            {manual ? 'Guardar' : 'Terminar'}
+          <Button
+            variant={editing ? 'primary' : 'secondary'}
+            loading={editing && finishing}
+            onClick={() => (editing && isValidWorkout(workout) ? void finish() : setFinishOpen(true))}
+          >
+            {editing ? 'Guardar cambios' : manual ? 'Guardar' : 'Terminar'}
           </Button>
         </div>
         {/* Overall progress: completed sets / total sets. */}
@@ -265,14 +294,15 @@ function LiveWorkout({ workout, live }: { workout: Workout; live: ReturnType<typ
             unit={unit}
             previous={perExercise.get(item.id)?.previous ?? null}
             suggestion={perExercise.get(item.id)?.suggestion ?? null}
-            onSetChange={(setId, patch) => live.update((w) => actions.updateSet(w, item.id, setId, patch))}
+            onSetChange={(setId, patch) => update((w) => actions.updateSet(w, item.id, setId, patch))}
             onToggleDone={(set) => toggleDone(item, set.id, !set.done)}
-            onAddSet={() => live.update((w) => actions.addSet(w, item.id))}
-            onRemoveSet={(setId) => live.update((w) => actions.removeSet(w, item.id, setId))}
+            onAddSet={() => update((w) => actions.addSet(w, item.id))}
+            onRemoveSet={(setId) => update((w) => actions.removeSet(w, item.id, setId))}
             onHowTo={() => setHowTo(true)}
             onReplace={() => setReplacing(true)}
             onOptions={() => setOptionsFor(item.id)}
-            onApplySuggestion={(weight) => live.update((w) => actions.applyWeightToPendingSets(w, item.id, weight))}
+            onPlates={() => setPlatesOpen(true)}
+            onApplySuggestion={(weight) => update((w) => actions.applyWeightToPendingSets(w, item.id, weight))}
             onDismissSuggestion={() => setDismissed((d) => new Set(d).add(exerciseKey(item.exercise)))}
           />
         )}
@@ -300,8 +330,9 @@ function LiveWorkout({ workout, live }: { workout: Workout; live: ReturnType<typ
             label="Notas de la sesión (opcional)"
             maxLength={WORKOUT_LIMITS.notesMax}
             value={workout.notes}
-            onChange={(e) => live.update((w) => ({ ...w, notes: e.target.value }))}
+            onChange={(e) => update((w) => ({ ...w, notes: e.target.value }))}
           />
+          {!editing && (
           <button
             type="button"
             onClick={() => setDiscardOpen(true)}
@@ -310,6 +341,7 @@ function LiveWorkout({ workout, live }: { workout: Workout; live: ReturnType<typ
             <Trash2 className="size-4" aria-hidden="true" />
             Descartar entrenamiento
           </button>
+          )}
         </div>
       </main>
 
@@ -320,7 +352,7 @@ function LiveWorkout({ workout, live }: { workout: Workout; live: ReturnType<typ
         onClose={() => setPickerOpen(false)}
         existingKeys={new Set(workout.exercises.map((e) => exerciseKey(e.exercise)))}
         onAdd={(exercises) => {
-          live.update((w) => actions.addExercises(w, exercises))
+          update((w) => actions.addExercises(w, exercises))
           setCurrent(workout.exercises.length)
         }}
       />
@@ -332,7 +364,16 @@ function LiveWorkout({ workout, live }: { workout: Workout; live: ReturnType<typ
           title={`Reemplazar «${item.exercise.name}»`}
           onClose={() => setReplacing(false)}
           existingKeys={new Set(workout.exercises.map((e) => exerciseKey(e.exercise)))}
-          onAdd={([exercise]) => exercise && live.update((w) => actions.replaceExercise(w, item.id, exercise))}
+          onAdd={([exercise]) => exercise && update((w) => actions.replaceExercise(w, item.id, exercise))}
+        />
+      )}
+
+      {item && platesOpen && (
+        <PlateCalculatorDialog
+          open
+          onClose={() => setPlatesOpen(false)}
+          unit={unit}
+          initialWeight={(item.sets.find((s) => !s.done) ?? item.sets.at(-1))?.weight ?? null}
         />
       )}
 
@@ -362,9 +403,9 @@ function LiveWorkout({ workout, live }: { workout: Workout; live: ReturnType<typ
         <ExerciseOptionsDialog
           item={optionsItem}
           onClose={() => setOptionsFor(null)}
-          onChange={(patch) => live.update((w) => actions.updateExercise(w, optionsItem.id, patch))}
+          onChange={(patch) => update((w) => actions.updateExercise(w, optionsItem.id, patch))}
           onRemove={() => {
-            live.update((w) => actions.removeExercise(w, optionsItem.id))
+            update((w) => actions.removeExercise(w, optionsItem.id))
             setOptionsFor(null)
           }}
         />

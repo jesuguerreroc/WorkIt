@@ -8,6 +8,7 @@ import { useAuth } from '@/features/auth/authContext'
 import { computeAchievements, countedWorkouts } from '@/features/streaks/achievements'
 import { StreakTiles } from '@/features/streaks/StreakTiles'
 import { computeStreaks } from '@/features/streaks/streaks'
+import { streakOptionsOf } from '@/features/streaks/streakOptions'
 import { formatVolume } from '@/features/workouts/format'
 import { useWorkoutHistory } from '@/features/workouts/useWorkouts'
 import { bestsByExercise, fromKg, roundWeight } from '@/features/workouts/workoutMath'
@@ -38,7 +39,7 @@ export function ProgressPage() {
   const { workouts, status } = useWorkoutHistory()
   const today = useToday()
   const counted = useMemo(() => countedWorkouts(workouts), [workouts])
-  const streak = useMemo(() => computeStreaks(counted.map((w) => w.localDate), today), [counted, today])
+  const streak = useMemo(() => computeStreaks(counted.map((w) => w.localDate), today, streakOptionsOf(profile)), [counted, today, profile])
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
@@ -71,7 +72,7 @@ export function ProgressPage() {
       {status === 'ready' && view === 'resumen' && <Summary workouts={workouts} unit={unit} today={today} streak={streak} />}
       {status === 'ready' && view === 'historial' && <History workouts={workouts} unit={unit} />}
       {status === 'ready' && view === 'ejercicios' && <ExerciseProgress workouts={workouts} unit={unit} />}
-      {status === 'ready' && view === 'logros' && <Achievements workouts={workouts} best={streak.best} />}
+      {status === 'ready' && view === 'logros' && <Achievements workouts={workouts} streak={streak} />}
     </div>
   )
 }
@@ -261,8 +262,8 @@ function Record({ label, children }: { label: string; children: React.ReactNode 
   )
 }
 
-function Achievements({ workouts, best }: { workouts: Workout[]; best: number }) {
-  const list = computeAchievements(workouts, best)
+function Achievements({ workouts, streak }: { workouts: Workout[]; streak: ReturnType<typeof computeStreaks> }) {
+  const list = computeAchievements(workouts, streak)
   return (
     <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {list.map((a) => (

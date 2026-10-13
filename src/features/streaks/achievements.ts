@@ -1,6 +1,6 @@
 import type { Workout } from '@/types/workout'
 import { isValidWorkout } from '@/features/workouts/workoutMath'
-import { firstDayReachingStreak } from './streaks'
+import { firstDayReachingStreak, type StreakInfo } from './streaks'
 
 /**
  * Achievements are derived from the workout history every time (never stored),
@@ -28,9 +28,8 @@ export function countedWorkouts(workouts: Workout[]): Workout[] {
     .sort((a, b) => a.localDate.localeCompare(b.localDate) || a.startedAt - b.startedAt)
 }
 
-export function computeAchievements(workouts: Workout[], bestStreak: number): Achievement[] {
+export function computeAchievements(workouts: Workout[], streak: StreakInfo): Achievement[] {
   const counted = countedWorkouts(workouts)
-  const days = counted.map((w) => w.localDate)
 
   const streaks: Achievement[] = STREAK_MILESTONES.map((target) => ({
     id: `streak-${target}`,
@@ -38,8 +37,8 @@ export function computeAchievements(workouts: Workout[], bestStreak: number): Ac
     description: `Entrena ${target} días seguidos.`,
     kind: 'streak',
     target,
-    achievedOn: firstDayReachingStreak(days, target),
-    progress: Math.min(1, bestStreak / target),
+    achievedOn: firstDayReachingStreak(streak, target),
+    progress: Math.min(1, streak.best / target),
   }))
 
   const sessions: Achievement[] = SESSION_MILESTONES.map((target) => ({

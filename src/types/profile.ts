@@ -20,6 +20,9 @@ export const EQUIPMENT = [
 export const WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const
 export const ONBOARDING_STATUSES = ['pending', 'completed', 'skipped'] as const
 
+export const STREAK_MODES = ['strict', 'flexible'] as const
+export const MAX_ALLOWED_MISSES = 2
+
 export const PROFILE_SCHEMA_VERSION = 1
 export const DISPLAY_NAME_MAX_LENGTH = 40
 
@@ -29,6 +32,7 @@ export type WeightUnit = (typeof WEIGHT_UNITS)[number]
 export type Equipment = (typeof EQUIPMENT)[number]
 export type Weekday = (typeof WEEKDAYS)[number]
 export type OnboardingStatus = (typeof ONBOARDING_STATUSES)[number]
+export type StreakMode = (typeof STREAK_MODES)[number]
 
 /** Fields the user can edit. */
 export interface ProfilePreferences {
@@ -38,6 +42,10 @@ export interface ProfilePreferences {
   trainingDays: Weekday[]
   equipment: Equipment[]
   weightUnit: WeightUnit
+  /** strict = consecutive days; flexible = rest days and short skips do not break it. */
+  streakMode: StreakMode
+  /** Flexible mode: planned days in a row that may be skipped (0–2). */
+  streakAllowedMisses: number
 }
 
 export interface UserProfile extends ProfilePreferences {

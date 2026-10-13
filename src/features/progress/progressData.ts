@@ -1,6 +1,7 @@
 import { addDays, formatDayMonth, localDateKey, startOfWeek } from '@/lib/dates'
 import { countedWorkouts } from '@/features/streaks/achievements'
 import { fromKg, isWorkingSet, roundWeight, toKg, workoutVolumeKg } from '@/features/workouts/workoutMath'
+import { estimateOneRepMax } from '@/features/workouts/strength'
 import { exerciseKey } from '@/types/exercise'
 import type { WeightUnit } from '@/types/profile'
 import type { Workout } from '@/types/workout'
@@ -88,6 +89,8 @@ export interface ExercisePoint {
   bestReps: number
   /** Σ weight × reps for this exercise in the session, in the user's unit. */
   volume: number
+  /** Best estimated 1RM of the session, in the user's unit (null if no set qualifies). */
+  e1rm: number | null
 }
 
 /** One point per session for an exercise, oldest first (load progression — not body weight). */
@@ -104,6 +107,12 @@ export function exerciseSeries(workouts: Workout[], key: string, unit: WeightUni
       topWeight: weightsKg.length ? roundWeight(fromKg(Math.max(...weightsKg), unit)) : null,
       bestReps: Math.max(...sets.map((s) => s.reps ?? 0)),
       volume: Math.round(fromKg(volumeKg, unit)),
+      e1rm: (() => {
+        const values = sets
+          .map((s) => (s.weight ? estimateOneRepMax(toKg(s.weight, workout.weightUnit), s.reps ?? 0) : null))
+          .filter((v): v is number => v !== null)
+        return values.length ? roundWeight(fromKg(Math.max(...values), unit)) : null
+      })(),
     })
   }
   return points

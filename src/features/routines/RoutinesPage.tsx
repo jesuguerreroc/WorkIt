@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
-import { Archive, ArchiveRestore, Copy, MoreHorizontal, Pencil, Play, Plus, Sparkles, Trash2 } from 'lucide-react'
+import { Archive, ArchiveRestore, Copy, FolderOpen, MoreHorizontal, Pencil, Play, Plus, Sparkles, Trash2 } from 'lucide-react'
 import { Alert } from '@/components/ui/Alert'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { ConfirmDialog, Dialog } from '@/components/ui/Dialog'
@@ -27,10 +27,16 @@ export function RoutinesPage() {
           <h1 className="font-display text-4xl font-bold uppercase">Rutinas</h1>
           <p className="mt-1 text-muted">Organiza tus sesiones y empieza a entrenar desde aquí.</p>
         </div>
-        <ButtonLink to="/app/rutinas/nueva">
-          <Plus className="size-4" aria-hidden="true" />
-          Nueva rutina
-        </ButtonLink>
+        <div className="flex gap-2">
+          <ButtonLink to="/app/programas" variant="secondary">
+            <FolderOpen className="size-4" aria-hidden="true" />
+            Programas
+          </ButtonLink>
+          <ButtonLink to="/app/rutinas/nueva">
+            <Plus className="size-4" aria-hidden="true" />
+            Nueva rutina
+          </ButtonLink>
+        </div>
       </header>
 
       {starter.active && (
@@ -113,7 +119,11 @@ function EmptyRoutines({ hasArchived }: { hasArchived: boolean }) {
           <Plus className="size-4" aria-hidden="true" />
           Crear rutina
         </ButtonLink>
-        <Button variant="secondary" onClick={createExample} loading={creating}>
+        <ButtonLink to="/app/programas" variant="secondary">
+          <FolderOpen className="size-4" aria-hidden="true" />
+          Explorar programas
+        </ButtonLink>
+        <Button variant="ghost" onClick={createExample} loading={creating}>
           <Sparkles className="size-4" aria-hidden="true" />
           Usar rutina de ejemplo
         </Button>

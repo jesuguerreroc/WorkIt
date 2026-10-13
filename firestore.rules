@@ -38,8 +38,11 @@ service cloud.firestore {
     }
 
     function validProfile(d) {
-      return d.keys().hasOnly(profileFields())
+      // streakMode / streakAllowedMisses were added later: optional so older profiles stay valid.
+      return d.keys().hasOnly(profileFields().concat(['streakMode', 'streakAllowedMisses']))
         && d.keys().hasAll(profileFields())
+        && (!('streakMode' in d) || d.streakMode in ['strict', 'flexible'])
+        && (!('streakAllowedMisses' in d) || (d.streakAllowedMisses is int && d.streakAllowedMisses >= 0 && d.streakAllowedMisses <= 2))
         && d.displayName is string && d.displayName.size() <= 40
         && (d.goal == null || d.goal in ['muscle', 'strength', 'fat_loss', 'maintenance'])
         && (d.level == null || d.level in ['beginner', 'intermediate', 'advanced'])
