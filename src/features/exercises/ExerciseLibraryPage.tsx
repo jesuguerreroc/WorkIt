@@ -27,10 +27,10 @@ export function ExerciseLibraryPage() {
   )
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6">
+    <div className="mx-auto flex max-w-6xl flex-col gap-5">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-4xl font-bold uppercase">Ejercicios</h1>
+          <h1 className="text-[1.75rem] leading-tight font-bold tracking-tight sm:text-3xl">Ejercicios</h1>
           <p className="mt-1 text-muted">Busca por nombre, músculo o equipamiento.</p>
         </div>
         <ButtonLink to="/app/ejercicios/nuevo" variant="secondary">
@@ -180,7 +180,7 @@ function EmptyState({ title, text, action }: { title: string; text: string; acti
   return (
     <div className="flex flex-col items-center gap-3 rounded-3xl border border-dashed border-border-strong px-6 py-12 text-center">
       <SearchX className="size-8 text-muted" aria-hidden="true" />
-      <p className="font-display text-2xl font-bold uppercase">{title}</p>
+      <p className="text-lg leading-snug font-semibold">{title}</p>
       <p className="max-w-sm text-muted">{text}</p>
       <div className="mt-2">{action}</div>
     </div>

@@ -26,7 +26,7 @@ export function AuthLayout({ title, description, children, footer }: AuthLayoutP
         </header>
 
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center py-10">
-          <h1 className="font-display text-4xl font-bold tracking-tight uppercase sm:text-5xl">{title}</h1>
+          <h1 className="text-[1.75rem] leading-tight font-bold tracking-tight sm:text-3xl">{title}</h1>
           <p className="mt-2 text-muted">{description}</p>
 
           {!isFirebaseConfigured && (

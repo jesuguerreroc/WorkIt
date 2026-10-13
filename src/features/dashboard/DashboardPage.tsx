@@ -42,11 +42,11 @@ export function DashboardPage() {
   const plannedDays = profile?.trainingDays.length ?? 0
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-6">
+    <div className="mx-auto flex max-w-5xl flex-col gap-5">
       <header className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-muted first-letter:uppercase">{formatLongDate(today)}</p>
-          <h1 className="mt-1 font-display text-4xl font-bold uppercase sm:text-5xl">{name ? `Hola, ${name}` : 'Hola'}</h1>
+          <h1 className="mt-1 text-[1.75rem] leading-tight font-bold tracking-tight sm:text-3xl">{name ? `Hola, ${name}` : 'Hola'}</h1>
         </div>
         <Link
           to="/app/racha"
@@ -61,7 +61,7 @@ export function DashboardPage() {
       {active && (
         <Link
           to={workoutPath(active.id)}
-          className="flex items-center gap-4 rounded-3xl border border-primary/50 bg-primary-soft p-5 transition-colors hover:bg-primary/20"
+          className="flex items-center gap-4 rounded-3xl border border-primary/50 bg-primary-soft p-4 transition-colors hover:bg-primary/20"
         >
           <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-on-primary">
             <Timer className="size-6" aria-hidden="true" />
@@ -76,7 +76,7 @@ export function DashboardPage() {
         </Link>
       )}
 
-      <section aria-labelledby="today-title" className="rounded-3xl border border-border bg-surface p-5 sm:p-7">
+      <section aria-labelledby="today-title" className="rounded-3xl border border-border glass p-4 sm:p-6">
         <p id="today-title" className="text-sm font-semibold tracking-wider text-primary uppercase">
           Hoy
         </p>
@@ -92,7 +92,7 @@ export function DashboardPage() {
           </div>
         ) : (
           <div className="mt-2 flex flex-col gap-4">
-            <p className="flex items-center gap-3 font-display text-3xl font-bold uppercase">
+            <p className="flex items-center gap-3 text-xl leading-tight font-bold tracking-tight">
               <Moon className="size-7 text-muted" aria-hidden="true" />
               Sin rutina programada
             </p>
@@ -123,7 +123,7 @@ export function DashboardPage() {
       >
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="font-display text-6xl leading-none font-bold tabular-nums">{streak.current}</p>
+            <p className="font-display text-5xl leading-none font-bold tabular-nums">{streak.current}</p>
             <p className="mt-1 font-semibold">{streak.current === 1 ? 'Día de racha' : 'Días de racha'}</p>
             <p className="text-sm text-muted">Mejor racha: {streak.best}</p>
           </div>
@@ -139,8 +139,8 @@ export function DashboardPage() {
       </Link>
 
       {counted.length === 0 ? (
-        <section className="rounded-3xl border border-dashed border-border-strong p-6 sm:p-8">
-          <h2 className="font-display text-2xl font-bold uppercase">Tu actividad</h2>
+        <section className="rounded-3xl border border-dashed border-border-strong p-4 sm:p-5">
+          <h2 className="text-lg leading-snug font-semibold">Tu actividad</h2>
           <p className="mt-2 max-w-lg text-muted">
             Todavía no hay entrenamientos completados. Tu racha, tus sesiones de la semana y tu volumen aparecerán aquí
             cuando termines tu primera sesión.
@@ -159,7 +159,7 @@ export function DashboardPage() {
                 <span className="ml-1 text-2xl text-subtle">{unit}</span>
               </Tile>
             </div>
-            <section aria-labelledby="recent-title" className="rounded-3xl border border-border bg-surface p-5">
+            <section aria-labelledby="recent-title" className="rounded-3xl border border-border glass p-4">
               <div className="flex items-center justify-between">
                 <h2 id="recent-title" className="font-semibold">
                   Últimos entrenamientos
@@ -205,7 +205,7 @@ function TodayRoutine({ routine, onStart, disabled }: { routine: Routine; onStar
     <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
         <Link to={`/app/rutinas/${routine.id}`} className="group block">
-          <p className="font-display text-3xl leading-tight font-bold uppercase group-hover:text-primary">{routine.name}</p>
+          <p className="text-xl leading-tight font-bold tracking-tight group-hover:text-primary">{routine.name}</p>
           <p className="flex items-center gap-1 text-muted">
             {routine.exercises.length} ejercicios · {sets} series · ≈ {estimateRoutineMinutes(routine.exercises)} min
             <span className="ml-1 font-semibold text-primary">Ver rutina</span>
@@ -224,7 +224,7 @@ function TodayRoutine({ routine, onStart, disabled }: { routine: Routine; onStar
 function FirstSteps() {
   return (
     <div className="mt-2 flex flex-col gap-4">
-      <p className="font-display text-3xl font-bold uppercase">Crea tu primera rutina</p>
+      <p className="text-xl leading-tight font-bold tracking-tight">Crea tu primera rutina</p>
       <p className="max-w-lg text-muted">
         Elige ejercicios, series, repeticiones y descansos. Después, empieza a entrenar desde aquí cada día que toque.
       </p>
@@ -244,7 +244,7 @@ function FirstSteps() {
 
 function Tile({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="rounded-3xl border border-border bg-surface p-4 sm:p-5">
+    <div className="rounded-3xl border border-border glass p-4 sm:p-5">
       <p className="text-sm text-muted">{label}</p>
       <p className="mt-1 font-display text-4xl font-bold">{children}</p>
     </div>

@@ -34,7 +34,7 @@ export function PublicHeader() {
     <header
       className={cn(
         'sticky top-0 z-40 border-b pt-[env(safe-area-inset-top)] transition-colors duration-200',
-        scrolled || open ? 'border-border bg-canvas/90 backdrop-blur-md' : 'border-transparent',
+        scrolled || open ? 'glass border-border' : 'border-transparent',
       )}
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">

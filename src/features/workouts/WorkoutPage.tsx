@@ -203,7 +203,7 @@ function LiveWorkout({
 
   return (
     <div className={`min-h-dvh ${timer.rest || timer.justFinished ? 'pb-48' : 'pb-16'}`}>
-      <header className="sticky top-0 z-30 bg-canvas/95 pt-[env(safe-area-inset-top)] backdrop-blur">
+      <header className="glass sticky top-0 z-30 pt-[env(safe-area-inset-top)]">
         <div className="mx-auto flex max-w-3xl items-center gap-2 px-4 py-2">
           <Link
             to={editing ? `/app/historial/${workout.id}` : '/app'}

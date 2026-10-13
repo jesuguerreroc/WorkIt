@@ -33,7 +33,7 @@ export function RestTimerBar({ timer, paused }: { timer: ReturnType<typeof useRe
       aria-label="Temporizador de descanso"
       className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]"
     >
-      <div className="relative mx-auto max-w-3xl overflow-hidden rounded-[2rem] border border-border-strong bg-surface-2/95 shadow-2xl shadow-black/70 backdrop-blur motion-safe:animate-rise">
+      <div className="relative mx-auto max-w-3xl overflow-hidden rounded-[2rem] glass-strong border border-border-strong shadow-2xl shadow-black/70 motion-safe:animate-rise">
         <div className="absolute inset-x-0 top-0 h-1 bg-surface-3">
           <div
             className="h-full origin-left bg-primary transition-transform duration-300 ease-linear"

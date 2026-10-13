@@ -21,10 +21,10 @@ export function RoutinesPage() {
   const archived = routines.filter((r) => r.status === 'archived')
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-6">
+    <div className="mx-auto flex max-w-4xl flex-col gap-5">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-4xl font-bold uppercase">Rutinas</h1>
+          <h1 className="text-[1.75rem] leading-tight font-bold tracking-tight sm:text-3xl">Rutinas</h1>
           <p className="mt-1 text-muted">Organiza tus sesiones y empieza a entrenar desde aquí.</p>
         </div>
         <div className="flex gap-2">
@@ -109,7 +109,7 @@ function EmptyRoutines({ hasArchived }: { hasArchived: boolean }) {
 
   return (
     <div className="flex flex-col items-center gap-4 rounded-3xl border border-dashed border-border-strong px-6 py-12 text-center">
-      <p className="font-display text-3xl font-bold uppercase">{hasArchived ? 'Sin rutinas activas' : 'Crea tu primera rutina'}</p>
+      <p className="text-xl leading-tight font-bold tracking-tight">{hasArchived ? 'Sin rutinas activas' : 'Crea tu primera rutina'}</p>
       <p className="max-w-md text-muted">
         Elige los ejercicios, las series, las repeticiones y los descansos. También puedes partir de una rutina de
         ejemplo de pecho, hombros y tríceps y adaptarla.
@@ -146,10 +146,10 @@ function RoutineCard({ routine, onStart }: { routine: Routine; onStart?: () => v
   const archived = routine.status === 'archived'
 
   return (
-    <article className="flex h-full flex-col gap-4 rounded-3xl border border-border bg-surface p-5">
+    <article className="flex h-full flex-col gap-4 rounded-3xl border border-border glass p-4">
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="font-display text-2xl leading-tight font-bold uppercase">
+          <h2 className="text-lg leading-snug font-semibold">
             <Link to={`/app/rutinas/${routine.id}`} className="hover:text-primary hover:underline">
               {routine.name}
             </Link>

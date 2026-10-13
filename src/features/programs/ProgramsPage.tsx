@@ -63,7 +63,7 @@ export function ProgramsPage() {
         Rutinas
       </Link>
       <header>
-        <h1 className="font-display text-4xl font-bold uppercase">Explorar programas</h1>
+        <h1 className="text-[1.75rem] leading-tight font-bold tracking-tight sm:text-3xl">Explorar programas</h1>
         <p className="mt-1 text-muted">Plantillas listas para usar. Al añadir una, sus entrenamientos se convierten en rutinas tuyas que puedes editar.</p>
       </header>
 
@@ -140,7 +140,7 @@ export function ProgramDetailPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6 pb-28">
+    <div className="mx-auto flex max-w-3xl flex-col gap-5 pb-28">
       <Link to="/app/programas" className="inline-flex min-h-11 items-center gap-2 self-start font-semibold text-muted hover:text-fg">
         <ArrowLeft className="size-5" aria-hidden="true" />
         Programas
@@ -148,7 +148,7 @@ export function ProgramDetailPage() {
       <header className="flex items-start gap-4">
         <Mosaic program={program} images={images} className="size-24" />
         <div className="min-w-0">
-          <h1 className="font-display text-4xl leading-none font-bold uppercase">{program.name}</h1>
+          <h1 className="text-[1.75rem] leading-tight font-bold tracking-tight sm:text-3xl">{program.name}</h1>
           <p className="mt-2 text-sm text-muted">
             {programCategoryLabels[program.category]} · {program.level} · {program.focus}
           </p>
@@ -159,7 +159,7 @@ export function ProgramDetailPage() {
       {program.workouts.map((workout) => (
         <section key={workout.name} aria-label={workout.name} className="rounded-3xl bg-surface p-4 sm:p-5">
           <div className="flex items-baseline justify-between gap-3">
-            <h2 className="font-display text-2xl font-bold uppercase">{workout.name}</h2>
+            <h2 className="text-lg leading-snug font-semibold">{workout.name}</h2>
             <p className="shrink-0 text-sm text-muted">
               {workout.exercises.length} ejercicios · ≈ {estimateRoutineMinutes(toRoutineExercises(workout))} min
             </p>

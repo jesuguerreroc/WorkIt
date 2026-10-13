@@ -43,10 +43,10 @@ export function StreakPage() {
         </button>
       </div>
 
-      <section className="rounded-[2rem] bg-surface p-5 sm:p-7" aria-labelledby="streak-title">
+      <section className="rounded-[2rem] bg-surface p-4 sm:p-6" aria-labelledby="streak-title">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="font-display text-8xl leading-none font-bold tabular-nums">{status === 'loading' ? '–' : streak.current}</p>
+            <p className="font-display text-7xl leading-none font-bold tabular-nums">{status === 'loading' ? '–' : streak.current}</p>
             <h1 id="streak-title" className="mt-1 text-xl font-semibold">
               {streak.current === 1 ? 'Día de racha' : 'Días de racha'}
             </h1>
@@ -70,14 +70,14 @@ export function StreakPage() {
       </section>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-3xl bg-surface p-4">
+        <div className="rounded-3xl border border-border glass p-4">
           <p className="flex items-center gap-2 font-display text-3xl font-bold">
             <Flame className="size-5 text-primary" aria-hidden="true" />
             {streak.best}
           </p>
           <p className="text-muted">Mejor racha</p>
         </div>
-        <div className="rounded-3xl bg-surface p-4">
+        <div className="rounded-3xl border border-border glass p-4">
           <p className="flex items-center gap-2 font-display text-3xl font-bold">
             <CalendarCheck className="size-5 text-primary" aria-hidden="true" />
             {streak.days.length}

@@ -134,7 +134,7 @@ function CustomExerciseForm({ exercise }: { exercise?: Exercise }) {
   }
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6">
+    <div className="mx-auto flex max-w-3xl flex-col gap-5">
       <button
         type="button"
         onClick={() => navigate(-1)}
@@ -143,7 +143,7 @@ function CustomExerciseForm({ exercise }: { exercise?: Exercise }) {
         <ArrowLeft className="size-5" aria-hidden="true" />
         Volver
       </button>
-      <h1 className="font-display text-4xl font-bold uppercase">{exercise ? 'Editar ejercicio' : 'Nuevo ejercicio'}</h1>
+      <h1 className="text-[1.75rem] leading-tight font-bold tracking-tight sm:text-3xl">{exercise ? 'Editar ejercicio' : 'Nuevo ejercicio'}</h1>
 
       <form noValidate onSubmit={onSubmit} className="flex flex-col gap-7">
         <TextField

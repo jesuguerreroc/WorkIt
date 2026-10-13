@@ -42,8 +42,8 @@ export function Dialog({ open, onClose, title, description, children, actions, v
       onClick={(event) => event.target === ref.current && onClose()}
       aria-labelledby="dialog-title"
       className={cn(
-        'm-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-lg overflow-hidden rounded-3xl border border-border-strong bg-surface p-0 text-fg shadow-2xl',
-        'backdrop:bg-black/70 backdrop:backdrop-blur-sm',
+        'm-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-lg overflow-hidden rounded-3xl glass-strong border border-border-strong p-0 text-fg shadow-2xl',
+        'backdrop:bg-black/60 backdrop:backdrop-blur-md',
         variant === 'sheet' &&
           'max-sm:mb-0 max-sm:h-[92dvh] max-sm:max-h-[92dvh] max-sm:w-full max-sm:max-w-none max-sm:rounded-b-none sm:max-w-2xl',
         className,
@@ -53,7 +53,7 @@ export function Dialog({ open, onClose, title, description, children, actions, v
         <div className={cn('flex max-h-[inherit] flex-col', variant === 'sheet' && 'max-sm:h-full')}>
           <header className="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
             <div>
-              <h2 id="dialog-title" className="font-display text-2xl font-bold uppercase">
+              <h2 id="dialog-title" className="text-lg leading-snug font-semibold">
                 {title}
               </h2>
               {description && <div className="mt-1 text-sm text-muted">{description}</div>}

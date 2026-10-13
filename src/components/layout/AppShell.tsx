@@ -61,7 +61,7 @@ function SidebarAccount() {
 export function AppShell() {
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[16rem_1fr]">
-      <aside className="sticky top-0 hidden h-dvh flex-col border-r border-border bg-surface px-4 py-6 lg:flex">
+      <aside className="sticky top-0 hidden h-dvh flex-col border-r border-border glass px-4 py-6 lg:flex">
         <Logo to="/app" className="px-2" />
         <nav aria-label="Principal" className="mt-10">
           <ul className="flex flex-col gap-1">
@@ -88,20 +88,20 @@ export function AppShell() {
       </aside>
 
       <div className="flex min-h-dvh flex-col">
-        <header className="sticky top-0 z-30 flex items-center border-b border-border bg-canvas/95 px-4 pt-[env(safe-area-inset-top)] backdrop-blur-md lg:hidden">
-          <div className="flex h-14 items-center">
+        <header className="sticky top-0 z-30 flex items-center glass border-b border-border px-4 pt-[env(safe-area-inset-top)] lg:hidden">
+          <div className="flex h-12 items-center">
             <Logo to="/app" />
           </div>
         </header>
         {/* Bottom padding keeps content clear of the fixed tab bar and the home indicator. */}
-        <main className="flex-1 px-4 pt-6 pb-[calc(4.5rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-10 lg:pt-10 lg:pb-10">
+        <main className="flex-1 px-4 pt-4 pb-[calc(4.25rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-10 lg:pt-10 lg:pb-10">
           <Outlet />
         </main>
       </div>
 
       <nav
         aria-label="Principal"
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-canvas/95 pb-[max(0.25rem,calc(env(safe-area-inset-bottom)-0.75rem))] backdrop-blur-md lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 glass-strong border-t border-border pb-[max(0.25rem,calc(env(safe-area-inset-bottom)-0.75rem))] backdrop-blur-md lg:hidden"
       >
         <ul className="grid grid-cols-5">
           {navItems.map((item) => (
@@ -111,12 +111,12 @@ export function AppShell() {
                 end={item.end}
                 className={({ isActive }) =>
                   cn(
-                    'flex min-h-14 flex-col items-center justify-center gap-1 text-[0.6875rem] font-semibold transition-colors',
+                    'flex min-h-[3.25rem] flex-col items-center justify-center gap-0.5 text-[0.65rem] font-semibold transition-colors',
                     isActive ? 'text-primary' : 'text-muted hover:text-fg',
                   )
                 }
               >
-                <item.icon className="size-6" aria-hidden="true" />
+                <item.icon className="size-[1.375rem]" aria-hidden="true" />
                 {item.label}
               </NavLink>
             </li>

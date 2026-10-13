@@ -18,7 +18,7 @@ export function StreakTiles({ streak }: { streak: StreakInfo }) {
         <p className="mt-2 font-display text-5xl leading-none font-bold">{streak.current}</p>
         <p className="mt-1 font-semibold">{streak.current === 1 ? 'día de racha' : 'días de racha'}</p>
       </div>
-      <div className="rounded-3xl border border-border bg-surface p-4 sm:p-5">
+      <div className="rounded-3xl border border-border glass p-4 sm:p-5">
         <Trophy className="size-6 text-primary" aria-hidden="true" />
         <p className="mt-2 font-display text-5xl leading-none font-bold">{streak.best}</p>
         <p className="mt-1 text-muted">mejor racha</p>

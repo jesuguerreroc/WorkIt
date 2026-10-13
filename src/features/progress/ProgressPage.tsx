@@ -42,9 +42,9 @@ export function ProgressPage() {
   const streak = useMemo(() => computeStreaks(counted.map((w) => w.localDate), today, streakOptionsOf(profile)), [counted, today, profile])
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-6">
+    <div className="mx-auto flex max-w-5xl flex-col gap-5">
       <header>
-        <h1 className="font-display text-4xl font-bold uppercase">Progreso</h1>
+        <h1 className="text-[1.75rem] leading-tight font-bold tracking-tight sm:text-3xl">Progreso</h1>
         <p className="mt-1 text-muted">Basado solo en tus entrenamientos registrados.</p>
       </header>
 
@@ -269,7 +269,7 @@ function Achievements({ workouts, streak }: { workouts: Workout[]; streak: Retur
       {list.map((a) => (
         <li
           key={a.id}
-          className={cn('flex gap-4 rounded-3xl border p-4', a.achievedOn ? 'border-primary/40 bg-primary-soft' : 'border-border bg-surface')}
+          className={cn('flex gap-4 rounded-3xl border p-4', a.achievedOn ? 'border-primary/40 bg-primary-soft' : 'border-border glass')}
         >
           <span
             className={cn(

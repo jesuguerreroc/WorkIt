@@ -40,7 +40,7 @@ export function OnboardingPage() {
 
       <main className="mx-auto max-w-3xl px-4 pt-6 pb-16 sm:px-6">
         <p className="text-sm font-semibold tracking-widest text-primary uppercase">Bienvenida</p>
-        <h1 className="mt-2 font-display text-4xl leading-[0.95] font-bold uppercase sm:text-5xl">
+        <h1 className="mt-2 text-[1.75rem] leading-tight font-bold tracking-tight sm:text-3xl">
           Configura tu entrenamiento
         </h1>
         <p className="mt-3 max-w-xl text-muted">

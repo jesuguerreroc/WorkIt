@@ -33,7 +33,7 @@ export function WorkoutReport({ workout, unit }: { workout: Workout; unit: Weigh
 
       {summary && summary.records.length > 0 && (
         <section aria-labelledby="records-title" className="rounded-3xl border border-primary/40 bg-primary-soft p-5">
-          <h2 id="records-title" className="flex items-center gap-2 font-display text-2xl font-bold uppercase">
+          <h2 id="records-title" className="flex items-center gap-2 text-lg leading-snug font-semibold">
             <Trophy className="size-6 text-primary" aria-hidden="true" />
             {summary.records.length === 1 ? 'Nuevo récord personal' : `${summary.records.length} récords personales`}
           </h2>
@@ -49,7 +49,7 @@ export function WorkoutReport({ workout, unit }: { workout: Workout; unit: Weigh
       )}
 
       <section aria-labelledby="sets-title" className="flex flex-col gap-3">
-        <h2 id="sets-title" className="font-display text-2xl font-bold uppercase">
+        <h2 id="sets-title" className="text-lg leading-snug font-semibold">
           Series registradas
         </h2>
         {workout.exercises.map((exercise) => {

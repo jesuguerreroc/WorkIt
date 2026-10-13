@@ -14,13 +14,13 @@ export function ProfilePage() {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-10">
-      <h1 className="font-display text-4xl font-bold uppercase">Perfil</h1>
+      <h1 className="text-[1.75rem] leading-tight font-bold tracking-tight sm:text-3xl">Perfil</h1>
 
       <AccountSection />
 
       <section aria-labelledby="preferences-title" className="flex flex-col gap-6">
         <div>
-          <h2 id="preferences-title" className="font-display text-2xl font-bold uppercase">
+          <h2 id="preferences-title" className="text-lg leading-snug font-semibold">
             Preferencias de entrenamiento
           </h2>
           <p className="mt-1 text-sm text-muted">Todos los campos son opcionales.</p>
@@ -59,8 +59,8 @@ function AccountSection() {
   }
 
   return (
-    <section aria-labelledby="account-title" className="rounded-3xl border border-border bg-surface p-5 sm:p-6">
-      <h2 id="account-title" className="font-display text-2xl font-bold uppercase">
+    <section aria-labelledby="account-title" className="rounded-3xl border border-border bg-surface p-4 sm:p-5">
+      <h2 id="account-title" className="text-lg leading-snug font-semibold">
         Cuenta
       </h2>
       <dl className="mt-4 grid gap-4 sm:grid-cols-2">

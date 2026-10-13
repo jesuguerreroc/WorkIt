@@ -52,7 +52,7 @@ function RoutineDetail({ routine }: { routine: Routine }) {
   const archived = routine.status === 'archived'
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6 pb-28">
+    <div className="mx-auto flex max-w-3xl flex-col gap-5 pb-28">
       <div className="flex items-center justify-between">
         <button
           type="button"
@@ -72,7 +72,7 @@ function RoutineDetail({ routine }: { routine: Routine }) {
       </div>
 
       <header>
-        <h1 className="font-display text-5xl leading-none font-bold uppercase">{routine.name}</h1>
+        <h1 className="text-[1.75rem] leading-tight font-bold tracking-tight sm:text-3xl">{routine.name}</h1>
         <p className="mt-2 text-muted">
           {routine.exercises.length} {routine.exercises.length === 1 ? 'ejercicio' : 'ejercicios'} · ≈ {minutes} min
           {days.length > 0 && <> · {days.join(', ')}</>}

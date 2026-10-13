@@ -79,7 +79,7 @@ function RoutineEditor({ routine, initial }: { routine?: Routine; initial: Routi
   }
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-6 pb-24">
+    <div className="mx-auto flex max-w-4xl flex-col gap-5 pb-24">
       <button
         type="button"
         onClick={() => navigate('/app/rutinas')}
@@ -88,7 +88,7 @@ function RoutineEditor({ routine, initial }: { routine?: Routine; initial: Routi
         <ArrowLeft className="size-5" aria-hidden="true" />
         Rutinas
       </button>
-      <h1 className="font-display text-4xl font-bold uppercase">{routine ? 'Editar rutina' : 'Nueva rutina'}</h1>
+      <h1 className="text-[1.75rem] leading-tight font-bold tracking-tight sm:text-3xl">{routine ? 'Editar rutina' : 'Nueva rutina'}</h1>
 
       <form noValidate onSubmit={onSubmit} className="flex flex-col gap-8">
         <TextField
@@ -115,7 +115,7 @@ function RoutineEditor({ routine, initial }: { routine?: Routine; initial: Routi
 
         <section aria-labelledby="routine-exercises-title" id="routine-exercises" className="flex flex-col gap-4">
           <div className="flex items-end justify-between gap-4">
-            <h2 id="routine-exercises-title" className="font-display text-2xl font-bold uppercase">
+            <h2 id="routine-exercises-title" className="text-lg leading-snug font-semibold">
               Ejercicios{values.exercises.length > 0 && ` (${values.exercises.length})`}
             </h2>
           </div>
@@ -158,7 +158,7 @@ function RoutineEditor({ routine, initial }: { routine?: Routine; initial: Routi
         {saveError && <Alert tone="error">{saveError}</Alert>}
 
         {/* Sticky save bar: always reachable on long routines, above the mobile tab bar. */}
-        <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-30 -mx-4 flex gap-3 border-t border-border bg-canvas/95 px-4 py-3 backdrop-blur lg:bottom-0 lg:mx-0 lg:rounded-2xl lg:border">
+        <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-30 -mx-4 flex gap-3 border-t border-border glass px-4 py-3 backdrop-blur lg:bottom-0 lg:mx-0 lg:rounded-2xl lg:border">
           <Button type="submit" size="lg" loading={saving} className="flex-1 sm:flex-none">
             {routine ? 'Guardar cambios' : 'Crear rutina'}
           </Button>

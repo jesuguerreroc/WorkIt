@@ -30,7 +30,7 @@ export function WorkoutSummaryPage() {
     <div className="mx-auto flex min-h-dvh max-w-3xl flex-col gap-6 px-4 pt-[calc(2rem+env(safe-area-inset-top))] pb-8">
       <header className="motion-safe:animate-rise">
         <PartyPopper className="size-10 text-primary" aria-hidden="true" />
-        <h1 className="mt-3 font-display text-5xl leading-none font-bold uppercase">
+        <h1 className="mt-3 text-[1.75rem] leading-tight font-bold tracking-tight sm:text-3xl">
           {workout.source === 'manual' ? 'Entrenamiento guardado' : '¡Entrenamiento completado!'}
         </h1>
         <p className="mt-2 text-muted">{workout.routineName}</p>

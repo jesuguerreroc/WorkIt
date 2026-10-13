@@ -4,7 +4,7 @@ export type Variant = 'primary' | 'secondary' | 'ghost' | 'inverse' | 'danger' |
 export type Size = 'md' | 'lg'
 
 const base =
-  'inline-flex items-center justify-center gap-2 rounded-xl font-semibold whitespace-nowrap select-none ' +
+  'inline-flex items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap select-none ' +
   'transition-[background-color,border-color,color,opacity] duration-150 ease-out ' +
   'disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:opacity-50'
 
@@ -21,8 +21,8 @@ const variants: Record<Variant, string> = {
 }
 
 const sizes: Record<Size, string> = {
-  md: 'min-h-11 px-4 text-[0.9375rem]',
-  lg: 'min-h-13 px-6 text-base',
+  md: 'min-h-11 px-4 text-sm',
+  lg: 'min-h-12 px-6 text-[0.9375rem]',
 }
 
 export function buttonClasses(variant: Variant = 'primary', size: Size = 'md', className?: string) {

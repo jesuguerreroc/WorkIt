@@ -38,7 +38,7 @@ export function WorkoutDetailPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6">
+    <div className="mx-auto flex max-w-3xl flex-col gap-5">
       <button
         type="button"
         onClick={() => navigate('/app/progreso?vista=historial')}
@@ -49,7 +49,7 @@ export function WorkoutDetailPage() {
       </button>
       <header>
         <p className="text-muted first-letter:uppercase">{formatLongDate(dateFromKey(workout.localDate))}</p>
-        <h1 className="font-display text-4xl font-bold uppercase">{workout.routineName}</h1>
+        <h1 className="text-[1.75rem] leading-tight font-bold tracking-tight sm:text-3xl">{workout.routineName}</h1>
         {workout.source === 'manual' && <p className="text-sm text-muted">Registrado después de la sesión.</p>}
       </header>
       <WorkoutReport workout={workout} unit={profile?.weightUnit ?? workout.weightUnit} />

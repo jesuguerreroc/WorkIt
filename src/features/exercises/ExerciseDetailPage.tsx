@@ -74,7 +74,7 @@ function ExerciseDetail({ exercise }: { exercise: Exercise }) {
   const [tab, setTab] = useState<(typeof TABS)[number]['id']>('resumen')
 
   return (
-    <article className="mx-auto flex max-w-5xl flex-col gap-6">
+    <article className="mx-auto flex max-w-5xl flex-col gap-5">
       <BackLink />
 
       <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr] lg:items-start">
@@ -82,7 +82,7 @@ function ExerciseDetail({ exercise }: { exercise: Exercise }) {
 
         <div className="flex flex-col gap-5">
           <header>
-            <h1 className="font-display text-4xl leading-none font-bold uppercase">{exercise.name}</h1>
+            <h1 className="text-[1.75rem] leading-tight font-bold tracking-tight sm:text-3xl">{exercise.name}</h1>
             {exercise.originalName && (
               <p className="mt-2 text-sm text-muted">
                 Nombre original: <span lang="en">{exercise.originalName}</span>
@@ -140,8 +140,8 @@ function ExerciseDetail({ exercise }: { exercise: Exercise }) {
       <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
         {tab === 'resumen' && <ExerciseStats exercise={exercise} />}
         {tab === 'guia' && (
-        <section aria-labelledby="instructions-title" className="rounded-3xl bg-surface p-5 sm:p-6">
-          <h2 id="instructions-title" className="font-display text-2xl font-bold uppercase">
+        <section aria-labelledby="instructions-title" className="rounded-3xl bg-surface p-4 sm:p-5">
+          <h2 id="instructions-title" className="text-lg leading-snug font-semibold">
             Cómo se hace
           </h2>
           {exercise.instructions.length === 0 ? (
