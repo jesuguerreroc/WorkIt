@@ -38,6 +38,7 @@
   --animate-float: float 6s ease-in-out infinite;
   --animate-pop: pop 450ms var(--ease-out-quart) both;
   --animate-flash: flash 1400ms ease-out both;
+  --animate-burst: burst 900ms var(--ease-out-quart) both;
 
   @keyframes rise {
     from {
@@ -76,6 +77,18 @@
     }
     100% {
       opacity: 0;
+    }
+  }
+
+  /* Record confetti: each particle flies to its own --dx/--dy. */
+  @keyframes burst {
+    from {
+      opacity: 1;
+      transform: translate(0, 0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translate(var(--dx), var(--dy)) scale(0.4);
     }
   }
 

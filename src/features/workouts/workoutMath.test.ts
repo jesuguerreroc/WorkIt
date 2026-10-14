@@ -7,6 +7,7 @@ import {
   detectRecords,
   elapsedSeconds,
   isValidWorkout,
+  liveRecord,
   previousPerformance,
   summarizeWorkout,
   toKg,
@@ -122,6 +123,31 @@ describe('records', () => {
     const summary = summarizeWorkout(now, history, start + 45 * 60_000)
     expect(summary).toMatchObject({ durationSec: 2700, exercisesDone: 1, setsDone: 2, totalReps: 16, volumeKg: 1000 })
     expect(summary.records).toHaveLength(1)
+  })
+})
+
+describe('liveRecord', () => {
+  const past = workout('p', '2026-10-01', [exercise('bench', [set(80, 8)])])
+  const live = (sets: WorkoutSet[]) => workout('l', '2026-10-08', [exercise('bench', sets)], { status: 'active' })
+
+  it('flags a heavier set than any earlier session', () => {
+    const w = live([set(85, 5)])
+    const hit = liveRecord(w, [past], w.exercises[0].id, w.exercises[0].sets[0].id)
+    expect(hit).toMatchObject({ kind: 'weight', value: 85, previous: 80 })
+  })
+
+  it('compares with sets already done in the same session', () => {
+    const w = live([set(85, 5), set(85, 4), set(90, 2)])
+    const [, second, third] = w.exercises[0].sets
+    expect(liveRecord(w, [past], w.exercises[0].id, second.id)).toBeNull()
+    expect(liveRecord(w, [past], w.exercises[0].id, third.id)).toMatchObject({ kind: 'weight', value: 90, previous: 85 })
+  })
+
+  it('ignores warm-ups, pending sets and exercises without history', () => {
+    const w = live([set(100, 5, { warmup: true }), set(100, 5, { done: false })])
+    for (const s of w.exercises[0].sets) expect(liveRecord(w, [past], w.exercises[0].id, s.id)).toBeNull()
+    const fresh = workout('f', '2026-10-08', [exercise('squat', [set(100, 5)])], { status: 'active' })
+    expect(liveRecord(fresh, [past], fresh.exercises[0].id, fresh.exercises[0].sets[0].id)).toBeNull()
   })
 })
 

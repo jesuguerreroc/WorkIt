@@ -109,6 +109,41 @@ export function detectRecords(workout: Workout, history: Workout[]): RecordHit[]
   return hits
 }
 
+/**
+ * Record set by one just-completed set, compared with earlier sessions and with
+ * the other completed sets of this session (so a second, heavier set also counts).
+ * Same rules as detectRecords; no history for the exercise means no record.
+ */
+export function liveRecord(workout: Workout, history: Workout[], exerciseId: string, setId: string): RecordHit | null {
+  const exercise = workout.exercises.find((e) => e.id === exerciseId)
+  const set = exercise?.sets.find((s) => s.id === setId)
+  if (!exercise || !set || !isWorkingSet(set)) return null
+  const key = exerciseKey(exercise.exercise)
+  const past = bestsByExercise(history.filter((w) => w.startedAt < workout.startedAt), workout.id).get(key)
+  if (!past) return null
+  const session = bestsByExercise([
+    { ...workout, status: 'completed', exercises: [{ ...exercise, sets: exercise.sets.filter((s) => s.id !== setId) }] },
+  ]).get(key)
+  const before = {
+    weightKg: Math.max(past.weightKg, session?.weightKg ?? 0),
+    reps: Math.max(past.reps, session?.reps ?? 0),
+    setVolumeKg: Math.max(past.setVolumeKg, session?.setVolumeKg ?? 0),
+  }
+  const weightKg = set.weight ? toKg(set.weight, workout.weightUnit) : 0
+  const volumeKg = setVolumeKg(set, workout.weightUnit)
+  const name = exercise.exercise.name
+  if (weightKg > before.weightKg + EPSILON && before.weightKg > 0) {
+    return { exerciseKey: key, exerciseName: name, kind: 'weight', value: weightKg, previous: before.weightKg }
+  }
+  if (volumeKg > before.setVolumeKg + EPSILON && before.setVolumeKg > 0) {
+    return { exerciseKey: key, exerciseName: name, kind: 'set_volume', value: volumeKg, previous: before.setVolumeKg }
+  }
+  if (weightKg === 0 && before.weightKg === 0 && (set.reps ?? 0) > before.reps) {
+    return { exerciseKey: key, exerciseName: name, kind: 'reps', value: set.reps ?? 0, previous: before.reps }
+  }
+  return null
+}
+
 export function summarizeWorkout(workout: Workout, history: Workout[], now: number): WorkoutSummary {
   let setsDone = 0
   let totalReps = 0

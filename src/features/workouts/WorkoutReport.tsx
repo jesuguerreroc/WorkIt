@@ -3,16 +3,9 @@ import { Trophy } from 'lucide-react'
 import { formatDuration } from '@/lib/dates'
 import { formatNumber } from '@/lib/numbers'
 import type { WeightUnit } from '@/types/profile'
-import type { RecordHit, Workout } from '@/types/workout'
-import { formatVolume } from './format'
-import { fromKg, isWorkingSet, roundWeight } from './workoutMath'
-
-function recordText(hit: RecordHit, unit: WeightUnit): string {
-  const w = (kg: number) => `${formatNumber(roundWeight(fromKg(kg, unit)))} ${unit}`
-  if (hit.kind === 'weight') return `Peso máximo: ${w(hit.value)} (antes ${w(hit.previous)})`
-  if (hit.kind === 'set_volume') return `Mejor serie (peso × reps): ${w(hit.value)} (antes ${w(hit.previous)})`
-  return `Más repeticiones: ${hit.value} (antes ${hit.previous})`
-}
+import type { Workout } from '@/types/workout'
+import { formatVolume, recordText } from './format'
+import { isWorkingSet } from './workoutMath'
 
 /** Stats, records and the sets of a completed session. */
 export function WorkoutReport({ workout, unit }: { workout: Workout; unit: WeightUnit }) {

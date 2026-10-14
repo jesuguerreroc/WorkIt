@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Workout } from '@/types/workout'
-import { exerciseSeries, exercisesInHistory, filterByDate, monthCalendar, weeklyBuckets } from './progressData'
+import { exerciseSeries, exercisesInHistory, filterByDate, monthCalendar, muscleLevel, setsByMuscle, weeklyBuckets } from './progressData'
 
 let n = 0
 const w = (day: string, weight: number | null, reps: number, extra: Partial<Workout> = {}): Workout => ({
@@ -77,5 +77,23 @@ describe('exercise progress', () => {
 
   it('filters history by inclusive date range', () => {
     expect(filterByDate(list, '2026-10-05', '2026-10-08').map((x) => x.localDate)).toEqual(['2026-10-08', '2026-10-05'])
+  })
+})
+
+describe('setsByMuscle', () => {
+  const musclesOf = () => ({ primary: ['chest'] as const, secondary: ['triceps', 'shoulders'] as const })
+
+  it('counts primary sets as 1 and secondary as 0.5 inside the window', () => {
+    const list = [w('2026-10-12', 60, 10), w('2026-10-13', 60, 10), w('2026-10-01', 60, 10)]
+    expect(setsByMuscle(list, '2026-10-14', 7, musclesOf)).toEqual([
+      { muscle: 'chest', sets: 2 },
+      { muscle: 'triceps', sets: 1 },
+      { muscle: 'shoulders', sets: 1 },
+    ])
+  })
+
+  it('skips unknown exercises and maps weekly sets to colour levels', () => {
+    expect(setsByMuscle([w('2026-10-12', 60, 10)], '2026-10-14', 7, () => undefined)).toEqual([])
+    expect([0, 2, 5, 8, 12].map(muscleLevel)).toEqual([0, 1, 2, 3, 4])
   })
 })

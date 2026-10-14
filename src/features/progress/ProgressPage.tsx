@@ -19,6 +19,7 @@ import { formatNumber } from '@/lib/numbers'
 import type { WeightUnit } from '@/types/profile'
 import type { Workout } from '@/types/workout'
 import { ActivityCalendar } from './ActivityCalendar'
+import { BodyMap } from './BodyMap'
 import { ChartFrame, SingleBarChart, SingleLineChart } from './charts'
 import { ManualWorkoutDialog } from './ManualWorkoutDialog'
 import { exerciseSeries, exercisesInHistory, filterByDate, weeklyBuckets } from './progressData'
@@ -96,6 +97,7 @@ function Summary({
       <div className="flex flex-col gap-4">
         <StreakTiles streak={streak} />
         <ActivityCalendar workouts={workouts} today={today} />
+        <BodyMap workouts={workouts} today={today} />
       </div>
       <div className="flex flex-col gap-4">
         <ChartFrame

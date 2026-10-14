@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router'
 import { ChevronDown, ChevronLeft, ChevronRight, Cloud, CloudOff, LoaderCircle, Pause, Play, Trash2, TriangleAlert } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
@@ -17,7 +17,7 @@ import { formatClock, formatShortDate } from '@/lib/dates'
 import { completeWorkout, deleteWorkout } from '@/services/workoutService'
 import { exerciseKey } from '@/types/exercise'
 import { REST_STEP_SECONDS, ROUTINE_LIMITS } from '@/types/routine'
-import { WORKOUT_LIMITS, type Workout, type WorkoutExercise, type WorkoutSet } from '@/types/workout'
+import { WORKOUT_LIMITS, type RecordHit, type Workout, type WorkoutExercise, type WorkoutSet } from '@/types/workout'
 import { localSession } from './localSession'
 import { suggestProgression } from './progression'
 import { RestTimerBar } from './RestTimerBar'
@@ -26,8 +26,9 @@ import { useLiveWorkout, useWorkoutHistory, type SyncState } from './useWorkouts
 import { ExerciseCarousel } from './ExerciseCarousel'
 import { ExerciseFocus } from './ExerciseFocus'
 import { PlateCalculatorDialog } from './PlateCalculatorDialog'
+import { RecordCelebration } from './RecordCelebration'
 import * as actions from './workoutActions'
-import { elapsedSeconds, isValidWorkout, previousPerformance, summarizeWorkout } from './workoutMath'
+import { elapsedSeconds, isValidWorkout, liveRecord, previousPerformance, summarizeWorkout } from './workoutMath'
 
 export function WorkoutPage() {
   const { id = '' } = useParams()
@@ -125,6 +126,9 @@ function LiveWorkout({
     [workout.exercises, workout.startedAt, pastHistory, dismissed, unit],
   )
 
+  const [record, setRecord] = useState<{ hit: RecordHit; id: number } | null>(null)
+  const closeRecord = useCallback(() => setRecord(null), [])
+
   const toggleDone = (item: WorkoutExercise, setId: string, done: boolean) => {
     const previous = perExercise.get(item.id)?.previous
     let next: Workout | null = null
@@ -144,6 +148,10 @@ function LiveWorkout({
     })
     if (!done || !next) return
     const after: Workout = next
+    if (!editing) {
+      const hit = liveRecord(after, pastHistory, item.id, setId)
+      if (hit) setRecord({ hit, id: Date.now() })
+    }
     // Last set of this exercise: move on to the next exercise with pending sets.
     const position = after.exercises.findIndex((e) => e.id === item.id)
     if (after.exercises[position]?.sets.every((s) => s.done)) {
@@ -346,6 +354,7 @@ function LiveWorkout({
       </main>
 
       {!manual && <RestTimerBar timer={timer} paused={paused} />}
+      {record && <RecordCelebration key={record.id} hit={record.hit} unit={unit} onClose={closeRecord} />}
 
       <ExercisePicker
         open={pickerOpen}

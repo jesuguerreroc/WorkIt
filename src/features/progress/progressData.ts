@@ -2,7 +2,7 @@ import { addDays, formatDayMonth, localDateKey, startOfWeek } from '@/lib/dates'
 import { countedWorkouts } from '@/features/streaks/achievements'
 import { fromKg, isWorkingSet, roundWeight, toKg, workoutVolumeKg } from '@/features/workouts/workoutMath'
 import { estimateOneRepMax } from '@/features/workouts/strength'
-import { exerciseKey } from '@/types/exercise'
+import { exerciseKey, type ExerciseRef, type Muscle } from '@/types/exercise'
 import type { WeightUnit } from '@/types/profile'
 import type { Workout } from '@/types/workout'
 
@@ -131,3 +131,44 @@ export function monthTitle(year: number, month: number): string {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
+
+export interface MuscleSets {
+  muscle: Muscle
+  /** Working sets: 1 per set for a primary muscle, 0.5 for a secondary one. */
+  sets: number
+}
+
+/**
+ * Working sets per muscle in the `days` days up to `today` (inclusive).
+ * `musclesOf` returns undefined for exercises that no longer exist (e.g. a
+ * deleted custom exercise); those are skipped.
+ */
+export function setsByMuscle(
+  workouts: Workout[],
+  today: string,
+  days: number,
+  musclesOf: (ref: ExerciseRef) => { primary: readonly Muscle[]; secondary: readonly Muscle[] } | undefined,
+): MuscleSets[] {
+  const from = addDays(today, -(days - 1))
+  const totals = new Map<Muscle, number>()
+  for (const workout of countedWorkouts(workouts)) {
+    if (workout.localDate < from || workout.localDate > today) continue
+    for (const exercise of workout.exercises) {
+      const sets = exercise.sets.filter(isWorkingSet).length
+      const muscles = sets > 0 ? musclesOf(exercise.exercise) : undefined
+      if (!muscles) continue
+      for (const m of new Set(muscles.primary)) totals.set(m, (totals.get(m) ?? 0) + sets)
+      for (const m of new Set(muscles.secondary)) if (!muscles.primary.includes(m)) totals.set(m, (totals.get(m) ?? 0) + sets / 2)
+    }
+  }
+  return [...totals].map(([muscle, sets]) => ({ muscle, sets })).sort((a, b) => b.sets - a.sets)
+}
+
+/** Colour level 0–4 from sets per week (about 10+ weekly sets is a common target). */
+export function muscleLevel(weeklySets: number): 0 | 1 | 2 | 3 | 4 {
+  if (weeklySets <= 0) return 0
+  if (weeklySets < 4) return 1
+  if (weeklySets < 7) return 2
+  if (weeklySets < 10) return 3
+  return 4
+}
