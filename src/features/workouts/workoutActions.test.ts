@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Workout, WorkoutExercise } from '@/types/workout'
-import { addSet, applyWeightToPendingSets, pause, restAfterCompleting, resume, setDone } from './workoutActions'
+import { addSet, applyWeightToPendingSets, carryForward, pause, restAfterCompleting, resume, setDone } from './workoutActions'
 import { elapsedSeconds } from './workoutMath'
 
 const ex = (id: string, name: string, sets: number, restBetweenSets = 90, restAfterExercise = 150): WorkoutExercise => ({
@@ -58,6 +58,25 @@ describe('restAfterCompleting', () => {
     expect(restAfterCompleting(w, 'bench')).toBeNull()
     const noRest = setDone(base([ex('a', 'A', 2, 0)]), 'a', 'a-0', true, 1)
     expect(restAfterCompleting(noRest, 'a')).toBeNull()
+  })
+})
+
+describe('carryForward', () => {
+  const sets = (w: Workout) => w.exercises[0].sets.map((s) => [s.weight, s.reps])
+
+  it('copies weight and reps to later pending sets only', () => {
+    let w = setDone(base([ex('bench', 'Press', 4)]), 'bench', 'bench-0', true, 1)
+    w = setDone(w, 'bench', 'bench-2', true, 2)
+    w = carryForward(w, 'bench', 'bench-1', { weight: 50, reps: 8 })
+    // Set 0 is earlier, set 2 is already done: both keep 60 × 10.
+    expect(sets(w)).toEqual([[60, 10], [60, 10], [60, 10], [50, 8]])
+  })
+
+  it('ignores empty values and never propagates from a warm-up', () => {
+    const w = base([ex('bench', 'Press', 3)])
+    expect(carryForward(w, 'bench', 'bench-0', { weight: null })).toBe(w)
+    const warm = { ...w, exercises: [{ ...w.exercises[0], sets: w.exercises[0].sets.map((s, i) => (i === 0 ? { ...s, warmup: true } : s)) }] }
+    expect(sets(carryForward(warm, 'bench', 'bench-0', { weight: 20 }))).toEqual([[60, 10], [60, 10], [60, 10]])
   })
 })
 

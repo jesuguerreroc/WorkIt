@@ -87,6 +87,7 @@ function LiveWorkout({
   const now = useNow(1000, !manual && !paused)
   const [pickerOpen, setPickerOpen] = useState(false)
   const [optionsFor, setOptionsFor] = useState<string | null>(null)
+  const [removing, setRemoving] = useState<string | null>(null)
   const [finishOpen, setFinishOpen] = useState(false)
   const [discardOpen, setDiscardOpen] = useState(false)
   const [dismissed, setDismissed] = useState<Set<string>>(new Set())
@@ -144,6 +145,9 @@ function LiveWorkout({
       if (done && target?.reps === null) fill.reps = prevSet?.reps ?? item.repsMax
       if (done && target?.weight === null && prevSet?.weight && previous?.unit === current.weightUnit) fill.weight = prevSet.weight
       next = actions.setDone(actions.updateSet(current, item.id, setId, fill), item.id, setId, done, Date.now())
+      // Completing a set carries its weight and reps to the following pending sets.
+      const logged = done ? next.exercises.find((e) => e.id === item.id)?.sets.find((s) => s.id === setId) : undefined
+      if (logged) next = actions.carryForward(next, item.id, setId, { weight: logged.weight, reps: logged.reps })
       return next
     })
     if (!done || !next) return
@@ -246,6 +250,17 @@ function LiveWorkout({
               {paused ? <Play className="size-5 fill-current" aria-hidden="true" /> : <Pause className="size-5" aria-hidden="true" />}
             </button>
           )}
+          {!editing && (
+            <button
+              type="button"
+              onClick={() => setDiscardOpen(true)}
+              aria-label="Descartar entrenamiento"
+              title="Descartar entrenamiento"
+              className="flex size-11 shrink-0 items-center justify-center rounded-full text-muted hover:bg-danger-soft hover:text-danger"
+            >
+              <Trash2 className="size-5" aria-hidden="true" />
+            </button>
+          )}
           <Button
             variant={editing ? 'primary' : 'secondary'}
             loading={editing && finishing}
@@ -302,7 +317,10 @@ function LiveWorkout({
             unit={unit}
             previous={perExercise.get(item.id)?.previous ?? null}
             suggestion={perExercise.get(item.id)?.suggestion ?? null}
-            onSetChange={(setId, patch) => update((w) => actions.updateSet(w, item.id, setId, patch))}
+            onSetChange={(setId, patch) =>
+              update((w) => actions.carryForward(actions.updateSet(w, item.id, setId, patch), item.id, setId, { weight: patch.weight, reps: patch.reps }))
+            }
+            onRemoveExercise={() => setRemoving(item.id)}
             onToggleDone={(set) => toggleDone(item, set.id, !set.done)}
             onAddSet={() => update((w) => actions.addSet(w, item.id))}
             onRemoveSet={(setId) => update((w) => actions.removeSet(w, item.id, setId))}
@@ -464,6 +482,19 @@ function LiveWorkout({
         tone="danger"
         onConfirm={discard}
         onCancel={() => setDiscardOpen(false)}
+      />
+
+      <ConfirmDialog
+        open={removing !== null}
+        title="Quitar ejercicio"
+        description={`Se quitará «${workout.exercises.find((e) => e.id === removing)?.exercise.name ?? 'este ejercicio'}» y sus series solo de este entrenamiento. Tu rutina no cambia.`}
+        confirmLabel="Quitar"
+        tone="danger"
+        onConfirm={() => {
+          if (removing) update((w) => actions.removeExercise(w, removing))
+          setRemoving(null)
+        }}
+        onCancel={() => setRemoving(null)}
       />
     </div>
   )

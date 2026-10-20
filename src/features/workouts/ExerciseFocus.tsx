@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { BookOpen, Check, Disc3, Minus, NotebookPen, Plus, Repeat, TrendingUp, X } from 'lucide-react'
+import { BookOpen, Check, Disc3, Minus, NotebookPen, Plus, Repeat, Trash2, TrendingUp, X } from 'lucide-react'
 import { NumericField } from '@/components/ui/NumericField'
 import { ExerciseImage } from '@/features/exercises/ExerciseImage'
 import { formatRest } from '@/features/routines/routineLogic'
@@ -21,6 +21,7 @@ interface ExerciseFocusProps {
   onToggleDone: (set: WorkoutSet) => void
   onAddSet: () => void
   onRemoveSet: (setId: string) => void
+  onRemoveExercise: () => void
   onHowTo: () => void
   onReplace: () => void
   onOptions: () => void
@@ -56,9 +57,20 @@ export function ExerciseFocus(props: ExerciseFocusProps) {
 
       <div className="flex flex-col gap-3 px-4">
         <div>
-          <h1 id="current-exercise" className="text-2xl leading-tight font-semibold">
-            {item.exercise.name}
-          </h1>
+          <div className="flex items-start justify-between gap-2">
+            <h1 id="current-exercise" className="text-2xl leading-tight font-semibold">
+              {item.exercise.name}
+            </h1>
+            <button
+              type="button"
+              onClick={props.onRemoveExercise}
+              aria-label={`Quitar ${item.exercise.name} de este entrenamiento`}
+              title="Quitar de este entrenamiento"
+              className="-mr-2 flex size-11 shrink-0 items-center justify-center rounded-full text-muted hover:bg-danger-soft hover:text-danger"
+            >
+              <Trash2 className="size-5" aria-hidden="true" />
+            </button>
+          </div>
           <p className="mt-1 text-sm text-muted">
             {item.sets.length} × {target} · Descanso {formatRest(item.restBetweenSets)} entre series ·{' '}
             {formatRest(item.restAfterExercise)} al cambiar

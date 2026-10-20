@@ -20,6 +20,28 @@ export function setDone(workout: Workout, exerciseId: string, setId: string, don
   return updateSet(workout, exerciseId, setId, { done, completedAt: done ? now : null })
 }
 
+/**
+ * Copies weight and/or reps from one set to the sets after it that are still
+ * pending. Completed sets and warm-ups are never touched, and a warm-up never
+ * propagates (its weight is not the working weight). Empty values are ignored.
+ */
+export function carryForward(
+  workout: Workout,
+  exerciseId: string,
+  setId: string,
+  values: { weight?: number | null; reps?: number | null },
+): Workout {
+  const patch: Partial<WorkoutSet> = {}
+  if (values.weight != null) patch.weight = values.weight
+  if (values.reps != null) patch.reps = values.reps
+  if (Object.keys(patch).length === 0) return workout
+  return mapExercise(workout, exerciseId, (e) => {
+    const index = e.sets.findIndex((s) => s.id === setId)
+    if (index === -1 || e.sets[index].warmup) return e
+    return { ...e, sets: e.sets.map((s, i) => (i > index && !s.done && !s.warmup ? { ...s, ...patch } : s)) }
+  })
+}
+
 /** Adds a set copying the last set's weight (the usual case at the gym). */
 export function addSet(workout: Workout, exerciseId: string): Workout {
   return mapExercise(workout, exerciseId, (e) => {
