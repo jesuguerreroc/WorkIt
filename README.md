@@ -18,7 +18,7 @@ y seguir tu progreso y tus rachas, en español y pensada para el móvil.
 ![Firebase](https://img.shields.io/badge/Firebase-1f2937?style=for-the-badge&logo=firebase&logoColor=ffca28)
 ![PWA](https://img.shields.io/badge/PWA-instalable-c5f035?style=for-the-badge&logo=pwa&logoColor=0a0b0d)
 
-[Funciones](#-funciones) · [Capturas](#-capturas) · [Tecnologías](#-tecnologías) · [Empezar](#-empezar) · [Seguridad](#-seguridad) · [Créditos](#-créditos)
+[Funciones](#-funciones) · [Capturas](#-capturas) · [Tecnologías](#-tecnologías) · [Empezar](#-empezar) · [Retomar](#-retomar-el-proyecto) · [Seguridad](#-seguridad) · [Créditos](#-créditos)
 
 </div>
 
@@ -100,6 +100,8 @@ cp .env.example .env.local   # rellena las variables de Firebase
 npm run dev                  # http://localhost:5173
 ```
 
+**Cómo abrirla:** con `npm run dev` en marcha, entra en <http://localhost:5173> desde el navegador. Para detener el servidor, pulsa `Ctrl + C` en la terminal. La versión publicada está siempre en [app-workit.netlify.app](https://app-workit.netlify.app/) y no necesita instalar nada.
+
 <details>
 <summary><b>Scripts disponibles</b></summary>
 
@@ -150,6 +152,30 @@ El repositorio incluye [`netlify.toml`](netlify.toml) con el comando de build, N
 
 </details>
 
+## 🔄 Retomar el proyecto
+
+Las carpetas `node_modules` y `dist` no se guardan en el repositorio porque se pueden regenerar. Para volver a trabajar después de un tiempo:
+
+```bash
+cd WorkIt          # la carpeta donde tengas el proyecto
+git pull           # trae la última versión
+npm install        # vuelve a crear node_modules
+npm run dev        # abre http://localhost:5173
+```
+
+Antes de publicar un cambio, comprueba que todo sigue bien:
+
+```bash
+npm run typecheck
+npm run lint
+npm test
+npm run build
+```
+
+**Si falta `.env.local`** (no está en el repositorio): copia `.env.example` como `.env.local` y rellénalo con los valores de Firebase Console → Configuración del proyecto → General → Tus apps → Configuración del SDK. La guía completa está en [`docs/FIREBASE.md`](docs/FIREBASE.md).
+
+**Estado actual:** la versión completa de la app está terminada y publicada. Las fotos propias en los ejercicios personalizados no están incluidas, porque Cloud Storage requiere el plan de pago de Firebase. Ten en cuenta que cada `git push` a `main` publica una versión nueva en Netlify.
+
 ## 🔐 Seguridad
 
 - **No hay secretos en el frontend.** La configuración web de Firebase es pública por diseño; los datos los protegen las [Security Rules](firestore.rules).
@@ -173,8 +199,11 @@ src/
     streaks/      rachas y logros
     profile/      perfil, preferencias y avisos
     landing/      página de inicio pública
+  hooks/          hooks de React compartidos
+  pages/          páginas generales (404)
   services/       acceso a Firebase
   lib/            utilidades (fechas, números, entorno)
+  styles/         estilos globales y tokens de diseño
   types/          modelos de datos
 tests/rules/      pruebas de las Security Rules
 docs/             DESIGN.md · DATA.md · FIREBASE.md · capturas
